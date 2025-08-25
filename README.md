@@ -42,7 +42,7 @@ The network stack, consist of using **TCP** and will only support IPv4... but wi
 
 For handling multiple connections, I went with pthreads threads approach. Since, the amount requests client devices is less than 10 on my private network. This would satisfy the performance needs without being too overkill and on using other APIs like `select()` or `poll()`. If scalability was a requirement then I would go with an alternative approach.
 
-Although encryption is essential when sending data over the internet for security and privacy, this program will not include it as the transfers will partake within my LAN (local area network).
+Although encryption is essential when sending data over the internet for security and privacy, this program will not include it as the transfers be within my _LAN_ (local area network).
 
 ![program flow](images/flow_chart.png "Program Flow Chart")
 
@@ -74,31 +74,32 @@ chmod +x update-system.sh && ./update-system.sh
 bash update-system.sh
 ```
 
-To find the raspberry pi on the network I use the commandline utility `nmap`.
+To find the raspberry pi on the network I use the command line utility `nmap`. To scan 
 
-> [!NOTE]
-> If nmap is not installed run the following code to install it on the system
-
-```bash
-sudo apt install nmap -y
-```
-Once install type `nmap -v` to see the version.
+To check if it is install type `nmap -v` to see the version. 
 
 Example:
-```
+```bash
 Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-08-25 09:40 PDT
 Read data files from: /usr/bin/../share/nmap
 WARNING: No targets were specified, so 0 hosts scanned.
 Nmap done: 0 IP addresses (0 hosts up) scanned in 0.01 seconds
 ```
 
-Once everything is installed run the following to find which devices have port 22 (_ssh_) opened on the network
+> [!NOTE]
+> If nmap is not installed no version will be shown. Run the following to install it on the system.
+
+```bash
+sudo apt install nmap -y
 ```
-nmap -p 22 192.168.0.1/24 | grep -B 3 open
+
+Once everything is installed run the following to find which devices have port 22 (_ssh_) opened on the network
+```bash
+nmap -p 22 192.168.0.1/24 | grep -B 4 open
 ```
 
 The following command will scan the whole host subnet looking for open (ssh) port 22 and capturing the following IPv4 address.
-```
+```bash
 Nmap scan report for 192.168.0.135
 Host is up (0.055s latency).
 
@@ -117,6 +118,10 @@ Host is up (0.021s latency).
 PORT   STATE SERVICE
 22/tcp open  ssh
 ```
+
+Since, my system DHCP server range is only from 192.168.0.2 - 192.168.0.200. I can determine which device was recently added to my _LAN_. 
+
+From there I ssh into to the Pi to get my system all setup. For the [Raspberry Pi](#raspberry-pi) section for setup.
 
 #### Raspberry Pi
 
@@ -147,7 +152,6 @@ PORT   STATE SERVICE
 </table>
 
 To get the raspberry pi up and running
-
 
 sample:
 ```bash
