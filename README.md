@@ -54,7 +54,71 @@ To run the following program a linux environment is needed. I have tested this o
 
 Methods:
 
-Raspberry Pi
+#### WSL 
+
+To install WSL on Windows open up the command prompt and type:
+```
+wsl --install
+```
+Set up password and other installation requirements as prompted.
+
+Once installed, just type wsl on the command prompt and it will open the WSL terminal.
+
+> [!NOTE]
+> Also just use `window + r` and type wsl to open it.
+
+Run the following script [update-system.sh](setup-scripts/update-system.sh) to make sure system is up to date.
+```bash
+chmod +x update-system.sh && ./update-system.sh
+# Or
+bash update-system.sh
+```
+
+To find the raspberry pi on the network I use the commandline utility `nmap`.
+
+> [!NOTE]
+> If nmap is not installed run the following code to install it on the system
+
+```bash
+sudo apt install nmap -y
+```
+Once install type `nmap -v` to see the version.
+
+Example:
+```
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-08-25 09:40 PDT
+Read data files from: /usr/bin/../share/nmap
+WARNING: No targets were specified, so 0 hosts scanned.
+Nmap done: 0 IP addresses (0 hosts up) scanned in 0.01 seconds
+```
+
+Once everything is installed run the following to find which devices have port 22 (_ssh_) opened on the network
+```
+nmap -p 22 192.168.0.1/24 | grep -B 3 open
+```
+
+The following command will scan the whole host subnet looking for open (ssh) port 22 and capturing the following IPv4 address.
+```
+Nmap scan report for 192.168.0.135
+Host is up (0.055s latency).
+
+PORT   STATE SERVICE
+22/tcp open  ssh
+--
+Nmap scan report for 192.168.0.245
+Host is up (0.052s latency).
+
+PORT   STATE SERVICE
+22/tcp open  ssh
+--
+Nmap scan report for 192.168.0.250
+Host is up (0.021s latency).
+
+PORT   STATE SERVICE
+22/tcp open  ssh
+```
+
+#### Raspberry Pi
 
 <table>
 	<thead align="center">
@@ -84,18 +148,28 @@ Raspberry Pi
 
 To get the raspberry pi up and running
 
-WSL 
 
-To install WSL on Windows open up the command prompt and type:
+sample:
+```bash
+pifive@raspberrypi:~ $ ./manual-ip.sh
+Beginning manual configuration...
+Enter IPv4 address: 192.168.0.251/24
+Enter gateway address: 192.168.0.1
+Enter DNS address: 8.8.8.8 1.1.1.1
+IP = 192.168.0.251/24
+Gateway = 192.168.0.1
+DNS = 8.8.8.8 1.1.1.1
+Does the follow information look correct [y/n]? y
+Changing ipv4.addresses to 192.168.0.251/24...
+done
+Changing ipv4.gateway to 192.168.0.1...
+done
+Changing ipv4.dns to 8.8.8.8 1.1.1.1...
+done
+Changing ipv4.method to manual...
+done
+Resetting network...
 ```
-wsl --install
-```
-set up password and other installation requirements as prompted.
-
-Once installed, just type wsl on the command prompt and it will open the WSL terminal.
-
-> [!NOTE]
-> Also just use `window + r` and type wsl to open it.
 
 Ubuntu
 
