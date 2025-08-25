@@ -50,6 +50,18 @@ Although encryption is essential when sending data over the internet for securit
 
 To run the following program a linux environment is needed. I have tested this on WSL (Windows Subsystem for Linux) and Debian-based Linux distributions such as Ubuntu and Raspbian (Raspberry Pi OS).
 
+The WSL2 version used:
+```
+wsl -v
+WSL version: 2.5.9.0
+Kernel version: 6.6.87.2-1
+WSLg version: 1.0.66
+MSRDC version: 1.2.6074
+Direct3D version: 1.611.1-81528511
+DXCore version: 10.0.26100.1-240331-1435.ge-release
+Windows version: 10.0.26100.4946
+```
+
 ### Environment Setup
 
 Methods:
@@ -64,7 +76,7 @@ Set up password and other installation requirements as prompted.
 
 Once installed, just type wsl on the command prompt and it will open the WSL terminal.
 
-> [!NOTE]
+> [!TIP]
 > Also just use `window + r` and type wsl to open it.
 
 Run the following script [update-system.sh](setup-scripts/update-system.sh) to make sure system is up to date.
@@ -153,9 +165,9 @@ From there I ssh into to the Pi to get my system all setup. For the [Raspberry P
 
 To get the raspberry pi up and running
 
-sample:
+Sample:
 ```bash
-pifive@raspberrypi:~ $ ./manual-ip.sh
+pifive@raspberrypi:~ $ chmod +x manual-ip.sh && ./manual-ip.sh
 Beginning manual configuration...
 Enter IPv4 address: 192.168.0.251/24
 Enter gateway address: 192.168.0.1
