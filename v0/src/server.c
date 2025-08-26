@@ -2,7 +2,29 @@
 #include "net_utility.h"
 #include <pthread.h>
 #include <netinet/in.h>
+#include <dirent.h>
 #define BACKLOG          10       /* Listen connections */
+
+void open_directory(char **file_name) {
+	
+	DIR *dir_fd;
+	struct dirent *directory;
+
+	/* Open directory to read from */
+	dir_fd = opendir(file_name[3]);
+	if ( dir_fd == NULL ) {
+		error_msg("Could not open directory");
+	}
+
+	/* Read each file name that is in the directory not including . or .. */
+	while ( (directory = readdir(dir_fd)) != NULL ) {
+		if ( strcmp(directory->d_name,".") == 0 || strcmp(directory->d_name,"..") == 0) { continue; }
+		printf("%s\n",directory->d_name);
+	}
+
+	/* Close the open directory descriptor */
+	closedir(dir_fd);
+} 
 
 void start_server(char **argv) {
 	
@@ -29,7 +51,7 @@ void start_server(char **argv) {
 	socklen_t host_port_len;
 
 	/* Information to send and rec */
-	Methods_t requests = { "Get OK\n","Put OK\n","List OK\n","See OK\n"};
+	/* Methods_t requests = { "Get OK\n","Put OK\n","List OK\n","See OK\n"}; */
 
 	/* Initial message to be sent to client after connection */
 	const char *welcome_message = "--------------------------------\n"
@@ -169,13 +191,12 @@ void start_server(char **argv) {
 		if ( bytes == -1 ) {
 			error_msg("Could not recieve bytes from client");
 			clean_up(NULL,NULL,&client_fd,NULL);
-			exit(1);
 		}
 
 		printf("Request: %s",recieve);
 
 		if ( strncmp(recieve,"Get",3) == 0 ) {
-			strncpy(response,requests.get,sizeof(response)-1);
+			strncpy(response,"Request: Get\nStatus: OK\nFile: \n",sizeof(response)-1);
 
 			bytes = send(client_fd,response,strnlen(response,BUFFER),0);
 			if ( bytes == -1 ) {
@@ -187,6 +208,34 @@ void start_server(char **argv) {
 			printf("Disconnecting from client...\n");
 			clean_up(NULL,NULL,&client_fd,NULL);
 			break;
+		}
+		else if ( strncmp(recieve,"List",4) == 0 ) {
+			strncpy(response,"Request: List\nStatus: OK\nFiles:\n",sizeof(response)-1);
+
+			DIR *dir_fd;
+			struct dirent *directory;
+
+			/* Open directory to read from */
+			dir_fd = opendir(argv[3]);
+			if ( dir_fd == NULL ) {
+				error_msg("Could not open directory");
+			}
+
+			/* Read each file name that is in the directory not including . or .. */
+			while ( (directory = readdir(dir_fd)) != NULL ) {
+				if ( strcmp(directory->d_name,".") == 0 || strcmp(directory->d_name,"..") == 0) { continue; }
+				strncat(response,directory->d_name,256);
+				strcat(response,"\n");
+			}
+
+			/* Close the open directory descriptor */
+			closedir(dir_fd);
+			bytes = send(client_fd,response,strnlen(response,BUFFER),0);
+			if ( bytes == -1 ) {
+				error_msg("Could not send get response to client");
+				clean_up(NULL,NULL,&client_fd,NULL);
+				exit(1);
+			}
 		}
 		else {
 			strncpy(response,"Invalid request... Closing connection\n",sizeof(response)-1);

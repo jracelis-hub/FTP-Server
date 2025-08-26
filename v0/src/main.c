@@ -2,10 +2,17 @@
 
 int main(int argc, char **argv) {
 
-	if ( argc < 3 ) {
-		usage(argv);
-		return -1;
-	}
+	#if defined(SERVER)
+		if ( argc < 4 ) {
+			usage(argv);
+			return -1;
+		}
+	#elif defined(client)
+		if ( argc < 3 ) {
+			usage(argv);
+			return -1;
+		}
+	#endif
 
 	int port = atoi(argv[2]);
 

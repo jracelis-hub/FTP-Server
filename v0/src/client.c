@@ -99,7 +99,12 @@ void start_client(char **argv) {
 		}
 		printf("%s",recieve);
 
-		if (strncmp(recieve,"Get",3) == 0) {
+		if (strncmp(recieve,"Request: Get\n",13) == 0) {
+			printf("Transfer complete\n");
+			printf("Closing connection...\n");
+			break;
+		}
+		else if ( strncmp(recieve,"Request: List\n",14) == 0 ) {
 			printf("Transfer complete\n");
 			printf("Closing connection...\n");
 			break;

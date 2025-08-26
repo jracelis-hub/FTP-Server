@@ -45,6 +45,7 @@ typedef struct {
 } requests_t;
 
 #if defined(SERVER)
+	void open_directory(char **file_name);
 	void start_server(char **argv);
 #endif
 
