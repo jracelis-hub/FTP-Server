@@ -37,12 +37,11 @@ void pass_msg(const char *task,int *task_id);
 /* Server Methods */
 typedef struct {
 	char methods[REQUEST_TYPE];
-		/* const char *get;	To download file from server to local */
-		/* const char *put;	To upload file from local to server */
+		/* const char *download;  To download file from server to local */
+		/* const char *upload;	To upload file from local to server */
 		/* const char *list; To list files on the server directory */
-		/* const char *see; To see a file from server into local stdout */
-	int status[STATUS_TYPE];
-} requests_t;
+	int mode
+} command_t;
 
 #if defined(SERVER)
 	void open_directory(char **file_name);

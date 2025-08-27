@@ -1,5 +1,12 @@
-# Socket Programming in C
+# FTP Server
 
+- [Overview](#overview)
+- [Design Philosophy](#design-philosophy)
+- [Requirements](#requirements)
+	- [Environment Setup](#environment-setup)
+- [Initial Testing](#initial-testing-v0-single-thread)
+- [Multi Thread](#multi-thread)
+		
 ## Overview
 
 I found myself working between different devices under my network. I currently have my desktop and two Raspbery Pis that I tend to transfer different files from one play to another via using `scp`. 
@@ -7,32 +14,6 @@ I found myself working between different devices under my network. I currently h
 With this project, I wanted to challenge myself in learning networking programming on a lower level. While there are many protocols and services to transfer files from one device to another `scp` `ftp` `ftps`... etc. I thought this would be a great learning experience to create my own file transfer program in C.
 
 After gaining knowledge on the Linux OS and intercommunication that is happening between embedded devices on my current job, I thought this would a great way to test my skills but also strengthen my ability to understand networking and systems on a lower level.
-
-## Sockets Background
-
-What is a ***socket***?
-
-A ***socket*** is a way to communicate between two programs via software, either on the same machine or across a network.
-
-The sockets API in was released in 1983 under the 4.2BSD (_Berkeley Software Distribution_) Unix operating system.
-
-The two main type of ***Socket*** domains are:
-
-1.) ***Internet Domain Sockets (INET)*** - Used to communicate between process on different systems connected over a network via TCP/IP or UDP/IP. Utilizes the 2 main IPs, `ipv4` 32 bit and `ipv6` 128 bit.
-
-2.) ***Unix Domain Sockets (UDS)*** - is an inter-process communication mechanism that allows bidirectional data exchange between process running on the same machine.
-
-Types of ***Sockets***:
-
-1.) ***Stream Sockets (SOCK_STREAM)*** - Provide a reliable, connection-oriented communication channel, ensuring that data is delivered in order and without dupliocation. Usually used with `TCP`. 
-
-2.) ***Datagram Sockets (SOCK_DGRAM)*** - Offer a connectionless communication method, faster but does not guarantee order or delivery. Usually used with `UDP`. 
-
-3.) ***Raw Sockets (SOCK_RAW)*** - Provides access to low-level network protocols and interfaces. Ordinary user programs usually have no need to use this style. 
-
-**Server** - Provides a specific service depending to the client request, usually over the internet
-
-**Client** - Request services or resources from a server over a network.
 
 ## Design Philosophy
 
@@ -45,6 +26,20 @@ For handling multiple connections, I went with pthreads threads approach. Since,
 Although encryption is essential when sending data over the internet for security and privacy, this program will not include it as the transfers be within my _LAN_ (local area network).
 
 ![program flow](images/flow_chart.png "Program Flow Chart")
+
+The FTP (File Transfer Protocol) rules and details utilized for this project is found in [RFC 959](#https://datatracker.ietf.org/doc/html/rfc959#ref-1). 
+
+The hosts are broken down to the client <-> server model. 
+
+The server being the FTP server (replier) and client is the user (requestor).
+
+The server will be listen on a its own configured port and will wrap around a specific directory on the server.
+
+Using the base set of rules and structure, the flow consists of the Data Transfer Process (DTP) and Command Process (CP).
+
+**Data Transfer Process** - the process of the server sending over requested information from the client (user).
+
+**Command Process** - a set of requested commands from the user to determine the correct data transfer process
 
 ## Requirements
 
@@ -191,21 +186,9 @@ Ubuntu
 
 Raspbian
 
-## Initial Testing V0 (Single Thread)
+## Initial Testing V0 Single Thread
 
 The [v0](v0/my_networking.c) was to create the bare skeleteon of the program itself to check for any error handling and to validate if the user input arguments are within the lengths of IPv4 and not utilizing any of the known ports below 1024. 
-
-Although it does not catch proper formatting when entering the first command line argument for IPv4 in the form for of:
-
-- 127.0.0.1
-- 192.xxx.xxx.xxx
-- 172.xxx.xxx.xxx
-- 10.xxx.xxx.xxx
-
-It does have a min and max value of the string length that the user can input for example:
-
-- IP_MIN_LEN 10.0.0.0 = 8 + `'\0'` = 9
-- IP_MAX_LEN 192.xxx.xxx.xxx = 15 + `'\0'` = 16
 
 > [!NOTE]
 > See [my_network.h](src/Version_0/my_networking.h) for defined macros.
