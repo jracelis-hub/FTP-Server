@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
 			usage(argv);
 			return -1;
 		}
-	#elif defined(client)
+	#elif defined(CLIENT)
 		if ( argc < 3 ) {
 			usage(argv);
 			return -1;

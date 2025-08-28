@@ -40,7 +40,7 @@ typedef struct {
 		/* const char *download;  To download file from server to local */
 		/* const char *upload;	To upload file from local to server */
 		/* const char *list; To list files on the server directory */
-	int mode
+	int mode;
 } command_t;
 
 #if defined(SERVER)

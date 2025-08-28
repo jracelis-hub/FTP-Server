@@ -1,51 +1,48 @@
-# Compiler Used and Variables
+# -------- Compiler Settings ------- #
 CC=gcc
-INCLUDE_DIR=-I../include
-S_DEFINE=-DSERVER
-C_DEFINE=-DCLIENT
+CLIENT_D=-DCLIENT
+SERVER_D=-DSERVER
+INCDIR=-I../include
 CFLAGS=-Wall -Wextra
 
+# -------- Executable Names -------- #
 SERVER=server
 CLIENT=client
 
-C_SRC=client.c net_utility.c
+# ---------- Object Files ---------- #
+# S = Server
+# C = Client
+OBJ_S=main.o net_utility.o server.o
+OBJ_C=main.o net_utility.o client.o
 
-S_SRC=server.c net_utility.c
+# ---------- Source Files ---------- #
+# S = Server
+# C = Client
+SRC_S=main.c net_utility.c server.c
+SRC_c=main.c net_utility.c client.c
 
-S_OBJ=s_main.o server.o net_utility.o
-S_OBJ_N=s_main.o
-C_OBJ=c_main.o client.o net_utility.o
-C_OBJ_N=c_main.o
+.Phony: clean,clean-server,clean-client
 
-.PHONY: clean-all clean-client clean-server
-
+# ---------- Make ----------
 all: $(SERVER) $(CLIENT)
 
-# To Build Server 
-
-$(SERVER): $(S_OBJ)
+$(SERVER): $(OBJ_S)
 	$(CC) -o $@ $^
 
-$(S_OBJ): $(S_SRC)
-	$(CC) $(FLAGS) $(S_DEFINE) -c $^ $(INCLUDE_DIR)
-
-$(S_OBJ_N): main.c
-	$(CC) $(FLAGS) $(S_DEFINE) -c $< -o $@ $(INCLUDE_DIR)
-
-# To Build Client 
-
-$(CLIENT): $(C_OBJ)
+$(CLIENT): $(OBJ_C)
 	$(CC) -o $@ $^
 
-$(C_OBJ): $(C_SRC)
-	$(CC) $(FLAGS) $(C_DEFINE) -c $^ $(INCLUDE_DIR) 
+%.o:%.c
+	$(CC) $(CFLAGS) $(SERVER_D) $(INCDIR) -c -o $@ $^
 
-$(C_OBJ_N): main.c
-	$(CC) $(FLAGS) $(C_DEFINE) -c $< -o $@ $(INCLUDE_DIR) 
+%.o:%.c
+	$(CC) $(CFLAGS) $(CLIENT_D) $(INCDIR) -c -o $@ $^
 
-# To Clean Server
+clean:
+	rm -rf $(SERVER) $(OBJ_S) $(CLIENT) $(OBJ_C)
+
 clean-server:
-	rm -rf $(S_OBJ) $(SERVER)
+	rm -rf $(SERVER) $(OBJ_S)
 
 clean-client:
-	rm -rf $(C_OBJ) $(CLIENT)
+	rm -rf $(CLIENT) $(OBJ_C)
