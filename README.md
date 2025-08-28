@@ -41,6 +41,36 @@ Using the base set of rules and structure, the flow consists of the Data Transfe
 
 **Command Process** - a set of requested commands from the user to determine the correct data transfer process
 
+<table>
+	<thead align="center">
+		<tr>
+			<th colspan="2">Command Table</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<th>Command</th>
+			<th>Description</th>
+		</tr>
+		<tr>	
+			<td>Upload</td>
+			<td>to upload a file onto the server</td>
+		</tr>	
+		<tr>	
+			<td>Download</td>
+			<td>to download a file from the server to local</td>
+		</tr>	
+		<tr>	
+			<td>List</td>
+			<td>to all the files mounted directory on the server</td>
+		</tr>	
+		<tr>	
+			<td>Read</td>
+			<td>to read the information of a file from the server</td>
+		</tr>	
+	</tbody>
+</table>
+
 ## Requirements
 
 To run the following program a linux environment is needed. I have tested this on WSL (Windows Subsystem for Linux) and Debian-based Linux distributions such as Ubuntu and Raspbian (Raspberry Pi OS).
