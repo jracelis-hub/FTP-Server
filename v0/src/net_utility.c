@@ -8,7 +8,7 @@ void format(int count,const char character) {
 	putchar('\n');
 }
 
-void usage(char **argv) {
+void usage(char *argv[]) {
 	format(40,'-');
 	printf("  Usage: %s [IPv4] [Port].\n",argv[0]);
 	printf("Example: %s 192.168.0.xxx 8000.\n",argv[0]);
@@ -34,9 +34,7 @@ void perform_task(const char *task_msg,int *task_id) {
 }
 
 void pass_msg(const char *task,int *task_id) {
-	if ( task != NULL && task_id != NULL ) {
-		printf("%s %d\n",task,*task_id);
-	}
+	if ( task != NULL && task_id != NULL ) printf("%s %d\n",task,*task_id);
 	int count = 35;	
 	for (int i=0; i < count; i++) {
 		putchar('-');

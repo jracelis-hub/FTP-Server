@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 RESET="\033[0m"
-RED="\033[031m"
-GREEN="\033[032m"
-YELLOW="\033[033m"
-BLUE="\033[034m"
+RED="\033[31m"
+GREEN="\033[32m"
+YELLOW="\033[33m"
+BLUE="\033[34m"
 
 update-system () {
 	echo -e "${YELLOW}Updating system...${RESET}"

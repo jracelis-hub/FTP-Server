@@ -28,20 +28,11 @@
 
 /* Functions Prototypes */
 void format(int count,const char character);
-void usage(char **argv);
+void usage(char *argv[]);
 void perform_task(const char *task_msg,int *task_id);
 void clean_up(pid_t *proc_id,int *sock_fd,int *client_fd,struct addrinfo **server ); /* If the follow does not need freeing put value as NULL */
 void error_msg(const char *message);
 void pass_msg(const char *task,int *task_id);
-
-/* Server Methods */
-typedef struct {
-	char methods[REQUEST_TYPE];
-		/* const char *download;  To download file from server to local */
-		/* const char *upload;	To upload file from local to server */
-		/* const char *list; To list files on the server directory */
-	int mode;
-} command_t;
 
 #if defined(SERVER)
 	void open_directory(char **file_name);

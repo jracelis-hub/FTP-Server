@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
+# Color text
 RESET="\033[0m"
 RED="\033[31m"
 GREEN="\033[32m"
 YELLOW="\033[33m"
 BLUE="\033[34m"
 
+# Pulls name of the network information for wlan0
 NET_NAME="$(nmcli c show | awk '/wlan0/ {print $1}')"
 
 get_ip () {
@@ -68,7 +70,6 @@ verbose_mode () {
                 echo "Okay exiting..."
                 exit 0
         fi
-
 }
 
 verbose_mode
