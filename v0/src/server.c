@@ -5,7 +5,7 @@
 #include <dirent.h>
 #define BACKLOG          10       /* Listen connections */
 
-void open_directory(char **file_name) {
+void open_directory(char *response,char **file_name) {
 	
 	DIR *dir_fd;
 	struct dirent *directory;
@@ -16,15 +16,70 @@ void open_directory(char **file_name) {
 		error_msg("Could not open directory");
 	}
 
-	/* Read each file name that is in the directory not including . or .. */
+	/* Read each file name that is in the directory not including . .. or .dotfiles */
 	while ( (directory = readdir(dir_fd)) != NULL ) {
-		if ( strcmp(directory->d_name,".") == 0 || strcmp(directory->d_name,"..") == 0) { continue; }
-		printf("%s\n",directory->d_name);
+		if ( strcmp(directory->d_name,".") == 0 || 
+		     strcmp(directory->d_name,"..") == 0 ||
+			 strncmp(directory->d_name,".",1) == 0) { continue; }
+
+		strncat(response,directory->d_name,256);
+		strcat(response,"\n");
 	}
 
 	/* Close the open directory descriptor */
 	closedir(dir_fd);
 } 
+
+int check_cmd(int *client_fd,ssize_t *bytes,char *recieve,char *response,char **file_name) {
+
+	char *cmd[] = { "Download\n","Upload\n","List\n","Read\n" };
+
+	if ( strcmp(recieve,cmd[0]) == 0 ) {
+		strcpy(response,"Request: Download\nStatus: OK\nFile:\n");
+
+		*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
+		if ( *bytes == -1 ) {
+			error_msg("Could not send get response to client");
+			clean_up(NULL,NULL,client_fd,NULL);
+			return -1;
+		}
+		return 0;
+	} else if ( strcmp(recieve,cmd[1]) == 0 ) {
+		strcpy(response,"Request: Upload\nStatus: OK\nFile:\n");
+
+		*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
+		if ( *bytes == -1 ) {
+			error_msg("Could not send get response to client");
+			clean_up(NULL,NULL,client_fd,NULL);
+			return -1;
+		}
+		return 0;
+	} else if ( strcmp(recieve,cmd[2]) == 0 ) {
+		strcpy(response,"Request: List\nStatus: OK\nFiles:\n");
+		open_directory(response,file_name);
+
+		*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
+		if ( *bytes == -1 ) {
+			error_msg("Could not send get response to client");
+			clean_up(NULL,NULL,client_fd,NULL);
+			return -1;
+		}
+		return 1;
+	} else if ( strcmp(recieve,cmd[3]) == 0 ) {
+		strcpy(response,"Request: Read\nStatus: OK\nFile:\n");
+		*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
+		if ( *bytes == -1 ) {
+			error_msg("Could not send get response to client");
+			clean_up(NULL,NULL,client_fd,NULL);
+			return -1;
+		}
+		return 1;
+	} else {
+		error_msg("Invalid input disconnecting from client...");
+		clean_up(NULL,NULL,client_fd,NULL);
+		return -1;
+	}
+}
 
 void start_server(char **argv) {
 	
@@ -54,16 +109,16 @@ void start_server(char **argv) {
 	/* Methods_t requests = { "Get OK\n","Put OK\n","List OK\n","See OK\n"}; */
 
 	/* Initial message to be sent to client after connection */
-	const char *welcome_message = "--------------------------------\n"
-	                              "|  Welcome to RPi FTP Server   |\n"
-                                  "|------------------------------|\n"
+	const char *welcome_message = "-------------------------------\n"
+	                              "|  Welcome to RPi FTP Server  |\n"
+                                  "|-----------------------------|\n"
 								  "|  Use the following methods:  |\n"
-                                  "|------------------------------|\n"
-								  "|  Get a file (download file)  |\n"
-								  "|  Put a file (upload file)    |\n"
-								  "|  List files in directory     |\n"
-								  "|  See file content            |\n"
-                                  "--------------------------------\n";
+                                  "|-----------------------------|\n"
+								  "|  Download a file         |\n"
+								  "|  Upload a file           |\n"
+								  "|  List files in directory |\n"
+								  "|  Read file content       |\n"
+                                  "---------------------------\n";
 	
 	/* Variables need to recieve and response to the client(s) 
 	   Buffer size for recieve and response is 1024 bytes */
@@ -186,7 +241,7 @@ void start_server(char **argv) {
 		/* Ensure the message buffers are 0 out before (re)sending data */
 		memset(recieve,0,sizeof(recieve));
 		memset(response,0,sizeof(response));
-
+		
 		bytes = recv(client_fd,recieve,sizeof(recieve),0);
 		if ( bytes == -1 ) {
 			error_msg("Could not recieve bytes from client");
@@ -195,60 +250,9 @@ void start_server(char **argv) {
 
 		printf("Request: %s",recieve);
 
-		if ( strncmp(recieve,"Get",3) == 0 ) {
-			strncpy(response,"Request: Get\nStatus: OK\nFile: \n",sizeof(response)-1);
-
-			bytes = send(client_fd,response,strnlen(response,BUFFER),0);
-			if ( bytes == -1 ) {
-				error_msg("Could not send get response to client");
-				clean_up(NULL,NULL,&client_fd,NULL);
-				exit(1);
-			}
-			printf("Server response complete...\n");
-			printf("Disconnecting from client...\n");
-			clean_up(NULL,NULL,&client_fd,NULL);
+		status = check_cmd(&client_fd,&bytes,recieve,response,argv);
+		if ( status == 0 || status == -1 ) {
 			break;
-		}
-		else if ( strncmp(recieve,"List",4) == 0 ) {
-			strncpy(response,"Request: List\nStatus: OK\nFiles:\n",sizeof(response)-1);
-
-			DIR *dir_fd;
-			struct dirent *directory;
-
-			/* Open directory to read from */
-			dir_fd = opendir(argv[3]);
-			if ( dir_fd == NULL ) {
-				error_msg("Could not open directory");
-			}
-
-			/* Read each file name that is in the directory not including . or .. */
-			while ( (directory = readdir(dir_fd)) != NULL ) {
-				if ( strcmp(directory->d_name,".") == 0 || strcmp(directory->d_name,"..") == 0) { continue; }
-				strncat(response,directory->d_name,256);
-				strcat(response,"\n");
-			}
-
-			/* Close the open directory descriptor */
-			closedir(dir_fd);
-			bytes = send(client_fd,response,strnlen(response,BUFFER),0);
-			if ( bytes == -1 ) {
-				error_msg("Could not send get response to client");
-				clean_up(NULL,NULL,&client_fd,NULL);
-				exit(1);
-			}
-		}
-		else {
-			strncpy(response,"Invalid request... Closing connection\n",sizeof(response)-1);
-
-			bytes = send(client_fd,response,strnlen(response,BUFFER),0);
-			if ( bytes == -1 ) {
-				error_msg("Could not send get response to client");
-				clean_up(NULL,NULL,&client_fd,NULL);
-				exit(1);
-			}
-			error_msg("Invalid input disconnecting from client...");
-			clean_up(NULL,NULL,&client_fd,NULL);
-			exit(1);
 		}
 	}
 

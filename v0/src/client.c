@@ -99,17 +99,25 @@ void start_client(char **argv) {
 		}
 		printf("%s",recieve);
 
-		if (strncmp(recieve,"Request: Get\n",13) == 0) {
+		if (strcmp(recieve,"Request: Download\n") == 0) {
 			printf("Transfer complete\n");
 			printf("Closing connection...\n");
 			break;
 		}
-		else if ( strncmp(recieve,"Request: List\n",14) == 0 ) {
+		else if ( strcmp(recieve,"Request: Upload\n") == 0 ) {
 			printf("Transfer complete\n");
 			printf("Closing connection...\n");
 			break;
 		}
-		else if (strncmp(recieve,"Invalid",7) == 0) {
+		else if ( strcmp(recieve,"Request: List\n") == 0 ) {
+			printf("Transfer complete\n");
+			printf("Closing connection...\n");
+		}
+		else if ( strcmp(recieve,"Request: Read\n") == 0 ) {
+			printf("Transfer complete\n");
+			printf("Closing connection...\n");
+		}
+		else if (strcmp(recieve,"Invalid\n") == 0) {
 			error_msg("Invalid request from server... Closing connection");
 			clean_up(NULL,&sock_fd,NULL,NULL);
 			exit(1);

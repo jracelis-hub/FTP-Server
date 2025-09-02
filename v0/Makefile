@@ -4,21 +4,22 @@ INC_DIR=./include/
 BUILD_DIR=./build
 C_OBJ_DIR=$(BUILD_DIR)/c_obj
 S_OBJ_DIR=$(BUILD_DIR)/s_obj
+T_OBJ_DIR=$(BUILD_DIR)/t_obj
 
 # ---------- Source Files ---------- #
 # S = Server
 # C = Client
-SRC_S=main.c net_utility.c server.c
-SRC_C=main.c net_utility.c client.c
+S_SRC=main.c net_utility.c server.c
+C_SRC=main.c net_utility.c client.c
 
-SRC_SD:=$(addprefix $(SRC_DIR),$(SRC_S))
-SRC_CD:=$(addprefix $(SRC_DIR),$(SRC_C))
+S_SRCD:=$(addprefix $(SRC_DIR),$(S_SRC))
+C_SRCD:=$(addprefix $(SRC_DIR),$(C_SRC))
 
 # ------------- Object Files ------------- #
 # S = Server
 # C = Client
-OBJ_S:=$(patsubst $(SRC_DIR)%.c,$(S_OBJ_DIR)/%.o,$(SRC_SD))
-OBJ_C:=$(patsubst $(SRC_DIR)%.c,$(C_OBJ_DIR)/%.o,$(SRC_CD))
+OBJ_S:=$(patsubst $(SRC_DIR)%.c,$(S_OBJ_DIR)/%.o,$(S_SRCD))
+OBJ_C:=$(patsubst $(SRC_DIR)%.c,$(C_OBJ_DIR)/%.o,$(C_SRCD))
 
 # ----------- Executable Names ----------- #
 SERVER:=$(addprefix $(BUILD_DIR)/,start-server)

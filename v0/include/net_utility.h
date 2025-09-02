@@ -19,7 +19,7 @@
 #include <arpa/inet.h>
 
 /* Macros */
-#define BUFFER         1024
+#define BUFFER         4056
 #define IP_MAX_LEN       16	      /* xxx.xxx.xxx.xxx + \0 */
 #define PORT_MAX_LEN      6	      /* xxxxx + \0 */
 #define IP_MIN_LEN        8       /* 10.0.0.0 */
@@ -35,7 +35,8 @@ void error_msg(const char *message);
 void pass_msg(const char *task,int *task_id);
 
 #if defined(SERVER)
-	void open_directory(char **file_name);
+	int check_cmd(int *client_fd,ssize_t *bytes,char *recieve,char *response,char **file_name);
+	void open_directory(char *response,char **file_name);
 	void start_server(char **argv);
 #endif
 
