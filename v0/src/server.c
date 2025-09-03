@@ -43,6 +43,8 @@ void start_server(char *argv[]) {
 	ssize_t bytes;
 	char receive[BUFFER];
 	char response[BUFFER];
+		
+	int done = 0;
 
 	/* Get process id of the server running */
 	pid_t process_id = getpid();
@@ -123,12 +125,11 @@ void start_server(char *argv[]) {
 	pass_msg(NULL,NULL);
 
 	while(1) {
-		
-		int done = 0;
 
 		/* Ensure the message buffers are 0 out before (re)sending data */
 		memset(receive,0,sizeof(receive));
 		memset(response,0,sizeof(response));
+
 		if (!done) {
 			/* The socket is now waiting for any incoming connections
 			   if accepted a new socket descriptor is created      */
@@ -163,18 +164,25 @@ void start_server(char *argv[]) {
 		   be sent to do_cmd function                              */
 		status = check_cmd(&client_fd,&bytes,receive);
 		if ( status == -1 ) {
-			error_msg("Invalid command: %s");
+			fprintf(stderr,"Invalid command: %s\n",receive);
 			clean_up(NULL,NULL,&client_fd,NULL);
+			done = 0;
 		}
 
 		/* After function returns request do_cmd does the following
 		   cmd and sends back the data requested from the client */
 		status = do_cmd(status,&client_fd,&bytes,response,argv);
-		if ( status == 1 ) {
+		if ( status == -1 ) {
 			error_msg("Could not send bytes");
 			clean_up(NULL,NULL,&client_fd,NULL);
+			done = 0;
+		} else if ( status == 0 ) {
+			pass_msg(NULL,NULL);
+			clean_up(NULL,NULL,&client_fd,NULL);
+			done = 0;
 		}
 	}
+
 	clean_up(&process_id,&listen_fd,NULL,NULL);
 }
 #endif /* End TEST_SERVER */

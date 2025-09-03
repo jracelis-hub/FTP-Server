@@ -56,14 +56,12 @@ void list_cmd(char *response,char **dir_name) {
 	closedir(dir_fd);
 } 
 
-/* TODO
-void download_cmd(char *file_name) {
+void download_cmd(char *file_name,char *response) {
 	int fd;
 
-	fd = open(""
+	fd = open(file_name,O_RDONLY);
 	
 }
-*/
 
 int check_cmd(int *client_fd,ssize_t *bytes,char *receive) {
 
@@ -77,15 +75,15 @@ int check_cmd(int *client_fd,ssize_t *bytes,char *receive) {
 
 	/* The request from client will compare to one of these 4 commands
 	   if the results are not 0 then it will return a fail -1 */
-	char *cmd[] = { "Download\n","Upload\n","List\n","Read\n" };
+	char *cmd[] = {"Download\n","Upload\n","List\n","Read\n" };
 
-	if (!strcmp(receive,cmd[0])) {
+	if (!strncmp(receive,cmd[0],9)) {
 		return DOWNLOAD;
 	} else if (!strcmp(receive,cmd[1])) {
 		return UPLOAD;
 	} else if (!strcmp(receive,cmd[2])) {
 		return LIST;
-	} else if (!strcmp(receive,cmd[2])) {
+	} else if (!strcmp(receive,cmd[3])) {
 		return READ;
 	} else {
 		return -1;
@@ -95,9 +93,9 @@ int check_cmd(int *client_fd,ssize_t *bytes,char *receive) {
 int do_cmd(int status,int *client_fd,ssize_t *bytes,char *response,char **dir_name) {
 
 	char *statuses[] = {"Request: Download\nStatus: Okay\nFile: random.txt\n",
-                        "Request: Upload \nStatus: Okay\nFile: random.txt\n",
-					    "Request: List \nStatus: Okay\nFiles:\n",
-					    "Request: Read \nStatus: Okay\nFile:\n" };
+                        "Request: Upload\nStatus: Okay\nFile: random.txt\n",
+					    "Request: List\nStatus: Okay\nFiles:\n",
+					    "Request: Read\nStatus: Okay\nFile:\n" };
 
 		if ( status == DOWNLOAD ) {
 			strncpy(response,statuses[0],BUFFER);
@@ -127,6 +125,7 @@ int do_cmd(int status,int *client_fd,ssize_t *bytes,char *response,char **dir_na
 				error_msg("Unable to send a response to client");
 				return -1;
 			}
+			return 1;
 		} else if ( status == READ ) {
 			strncpy(response,statuses[3],BUFFER);
 			*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
@@ -134,6 +133,7 @@ int do_cmd(int status,int *client_fd,ssize_t *bytes,char *response,char **dir_na
 				error_msg("Unable to send a response to client");
 				return -1;
 			}
+			return 1;
 		}
 		return 0;
 }
