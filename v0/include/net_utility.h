@@ -35,13 +35,11 @@ void error_msg(const char *message);
 void pass_msg(const char *task,int *task_id);
 
 #if defined(SERVER)
-	int check_cmd(int *client_fd,ssize_t *bytes,char *recieve,char *response,char **file_name);
-	void open_directory(char *response,char **file_name);
-	void start_server(char **argv);
+	void start_server(char *argv[]);
 #endif
 
 #if defined(CLIENT)
-	void start_client(char **argv);
+	void start_client(char *argv[]);
 #endif
 
 #endif /* NET_UTILITY_H */

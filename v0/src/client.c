@@ -15,11 +15,11 @@ void start_client(char **argv) {
 	char ip[IP_MAX_LEN];
 	char port[PORT_MAX_LEN];
 
-	/* Bytes to recieve or send of a response 
+	/* Bytes to receive or send of a response 
 	   Buffer size of 1024 characters */
 	ssize_t bytes;
 	char response[BUFFER];
-	char recieve[BUFFER];
+	char receive[BUFFER];
 
 	/* Gives the process id of the FTP server */
 	pid_t process_id = getpid();
@@ -74,9 +74,7 @@ void start_client(char **argv) {
 	status = connect(sock_fd,server->ai_addr,server->ai_addrlen);
 	if ( status < 0 ) {
 		error_msg("Failed to connect server.");
-		printf("Process killed: %d\n",process_id);
-		close(sock_fd);
-		freeaddrinfo(server);
+		clean_up(&process_id,&sock_fd,NULL,&server);
 		exit(1);
 	}
 
@@ -87,37 +85,38 @@ void start_client(char **argv) {
 	/* Begin Data transfering */
 	while(1) {
 
-		/* Zero out the buffers to avoid recieve old data */
-		memset(recieve,0,sizeof(recieve));
+		/* Zero out the buffers to avoid receive old data */
+		memset(receive,0,sizeof(receive));
 		memset(response,0,sizeof(response));
 
-		bytes = recv(sock_fd,recieve,sizeof(recieve),0);
+		bytes = recv(sock_fd,receive,sizeof(receive),0);
 		if ( bytes == -1 ) {
-			error_msg("Could not recieve bytes from server");
+			error_msg("Could not receive bytes from server");
 			close(sock_fd);
 			exit(1);
 		}
-		printf("%s",recieve);
+		printf("Received bytes: %zu\n",bytes);
+		printf("%s",receive);
 
-		if (strcmp(recieve,"Request: Download\n") == 0) {
+		if (strncmp(receive,"Request: Download\n",18) == 0) {
 			printf("Transfer complete\n");
 			printf("Closing connection...\n");
 			break;
-		}
-		else if ( strcmp(recieve,"Request: Upload\n") == 0 ) {
+		} else if ( strncmp(receive,"Request: Upload\n",16) == 0 ) {
 			printf("Transfer complete\n");
 			printf("Closing connection...\n");
+			bytes = send(sock_fd,response,strnlen(response,BUFFER),0);
+			if ( bytes == -1 ) {
+				error_msg("Could not receive bytes from server");
+				clean_up(NULL,&sock_fd,NULL,NULL);
+				exit(1);
+		}
 			break;
-		}
-		else if ( strcmp(recieve,"Request: List\n") == 0 ) {
-			printf("Transfer complete\n");
-			printf("Closing connection...\n");
-		}
-		else if ( strcmp(recieve,"Request: Read\n") == 0 ) {
-			printf("Transfer complete\n");
-			printf("Closing connection...\n");
-		}
-		else if (strcmp(recieve,"Invalid\n") == 0) {
+		} else if ( strncmp(receive,"Request: List\n",15) == 0 ) {
+			continue;
+		} else if ( strncmp(receive,"Request: Read\n",14) == 0 ) {
+			continue;
+		} else if (strncmp(receive,"Invalid\n",8) == 0) {
 			error_msg("Invalid request from server... Closing connection");
 			clean_up(NULL,&sock_fd,NULL,NULL);
 			exit(1);
@@ -127,7 +126,7 @@ void start_client(char **argv) {
 		fgets(response,BUFFER-1,stdin);
 		bytes = send(sock_fd,response,strnlen(response,BUFFER),0);
 		if ( bytes == -1 ) {
-			error_msg("Could not recieve bytes from server");
+			error_msg("Could not receive bytes from server");
 			clean_up(NULL,&sock_fd,NULL,NULL);
 			exit(1);
 		}

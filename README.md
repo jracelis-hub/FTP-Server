@@ -73,6 +73,7 @@ Using the base set of rules and structure, the flow consists of the Data Transfe
 
 ## Requirements
 
+
 To run the following program a linux environment is needed. I have tested this on WSL (Windows Subsystem for Linux) and Debian-based Linux distributions such as Ubuntu and Raspbian (Raspberry Pi OS).
 
 The WSL2 version used:
@@ -217,6 +218,33 @@ Ubuntu
 Raspbian
 
 ## Initial Testing V0 Single Thread
+
+v0 format file structure is broken down into the following format:
+```
+├── Makefile
+├── build
+│   ├── c_obj
+│   │   ├── client.o
+│   │   ├── main.o
+│   │   └── net_utility.o
+│   ├── s_obj
+│   │   ├── commands.o
+│   │   ├── main.o
+│   │   ├── net_utility.o
+│   │   └── server.o
+│   ├── start-client
+│   └── start-server
+├── include
+│   ├── commands.h
+│   └── net_utility.h
+└── src
+    ├── client.c
+    ├── commands.c
+    ├── main.c
+    ├── net_utility.c
+    ├── server.c
+    └── unit-test.c
+```
 
 The [v0](v0/my_networking.c) was to create the bare skeleteon of the program itself to check for any error handling and to validate if the user input arguments are within the lengths of IPv4 and not utilizing any of the known ports below 1024. 
 

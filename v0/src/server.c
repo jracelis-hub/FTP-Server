@@ -1,91 +1,28 @@
 #if defined(SERVER)
 #include "net_utility.h"
-#include <pthread.h>
+#include "commands.h"
 #include <netinet/in.h>
-#include <dirent.h>
+#include <pthread.h>
 #define BACKLOG          10       /* Listen connections */
 
-void open_directory(char *response,char **file_name) {
-	
-	DIR *dir_fd;
-	struct dirent *directory;
+/* Initial message to be sent to client after connection */
+static const char *welcome_message = 
+"-------------------------------\n"
+"|  Welcome to RPi FTP Server  |\n"
+"|-----------------------------|\n"
+"|  Use the following methods: |\n"
+"|------------------------------\n"
+"|  Download a file         |\n"
+"|  Upload a file           |\n"
+"|  List files in directory |\n"
+"|  Read file content       |\n"
+"----------------------------\n";
 
-	/* Open directory to read from */
-	dir_fd = opendir(file_name[3]);
-	if ( dir_fd == NULL ) {
-		error_msg("Could not open directory");
-	}
-
-	/* Read each file name that is in the directory not including . .. or .dotfiles */
-	while ( (directory = readdir(dir_fd)) != NULL ) {
-		if ( strcmp(directory->d_name,".") == 0 || 
-		     strcmp(directory->d_name,"..") == 0 ||
-			 strncmp(directory->d_name,".",1) == 0) { continue; }
-
-		strncat(response,directory->d_name,256);
-		strcat(response,"\n");
-	}
-
-	/* Close the open directory descriptor */
-	closedir(dir_fd);
-} 
-
-int check_cmd(int *client_fd,ssize_t *bytes,char *recieve,char *response,char **file_name) {
-
-	char *cmd[] = { "Download\n","Upload\n","List\n","Read\n" };
-
-	if ( strcmp(recieve,cmd[0]) == 0 ) {
-		strcpy(response,"Request: Download\nStatus: OK\nFile:\n");
-
-		*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
-		if ( *bytes == -1 ) {
-			error_msg("Could not send get response to client");
-			clean_up(NULL,NULL,client_fd,NULL);
-			return -1;
-		}
-		return 0;
-	} else if ( strcmp(recieve,cmd[1]) == 0 ) {
-		strcpy(response,"Request: Upload\nStatus: OK\nFile:\n");
-
-		*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
-		if ( *bytes == -1 ) {
-			error_msg("Could not send get response to client");
-			clean_up(NULL,NULL,client_fd,NULL);
-			return -1;
-		}
-		return 0;
-	} else if ( strcmp(recieve,cmd[2]) == 0 ) {
-		strcpy(response,"Request: List\nStatus: OK\nFiles:\n");
-		open_directory(response,file_name);
-
-		*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
-		if ( *bytes == -1 ) {
-			error_msg("Could not send get response to client");
-			clean_up(NULL,NULL,client_fd,NULL);
-			return -1;
-		}
-		return 1;
-	} else if ( strcmp(recieve,cmd[3]) == 0 ) {
-		strcpy(response,"Request: Read\nStatus: OK\nFile:\n");
-		*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
-		if ( *bytes == -1 ) {
-			error_msg("Could not send get response to client");
-			clean_up(NULL,NULL,client_fd,NULL);
-			return -1;
-		}
-		return 1;
-	} else {
-		error_msg("Invalid input disconnecting from client...");
-		clean_up(NULL,NULL,client_fd,NULL);
-		return -1;
-	}
-}
-
-void start_server(char **argv) {
+void start_server(char *argv[]) {
 	
 	/* Socket File Descriptors
 	   Error Validation     */
-	int sock_fd, status, client_fd;
+	int listen_fd, status, client_fd;
 
 	/* Structure to hold information for the server */
 	struct addrinfo hints, *server;
@@ -100,30 +37,11 @@ void start_server(char **argv) {
 	   ONLY HOLDS IPv4!                   */
 	struct sockaddr_in client_in;
 	socklen_t client_len;
-	char host_ip[NI_MAXHOST];
-	socklen_t host_ip_len;
-	char host_port[NI_MAXSERV];
-	socklen_t host_port_len;
 
-	/* Information to send and rec */
-	/* Methods_t requests = { "Get OK\n","Put OK\n","List OK\n","See OK\n"}; */
-
-	/* Initial message to be sent to client after connection */
-	const char *welcome_message = "-------------------------------\n"
-	                              "|  Welcome to RPi FTP Server  |\n"
-                                  "|-----------------------------|\n"
-								  "|  Use the following methods:  |\n"
-                                  "|-----------------------------|\n"
-								  "|  Download a file         |\n"
-								  "|  Upload a file           |\n"
-								  "|  List files in directory |\n"
-								  "|  Read file content       |\n"
-                                  "---------------------------\n";
-	
-	/* Variables need to recieve and response to the client(s) 
-	   Buffer size for recieve and response is 1024 bytes */
+	/* Variables need to receive and response to the client(s) 
+	   Buffer size for receive and response is 1024 bytes */
 	ssize_t bytes;
-	char recieve[BUFFER];
+	char receive[BUFFER];
 	char response[BUFFER];
 
 	/* Get process id of the server running */
@@ -157,11 +75,10 @@ void start_server(char **argv) {
 	hints.ai_protocol = 0;
 	hints.ai_flags = 0;
 
-
 	/* Resolve server information */
 	perform_task("Resolving server information...",NULL);
 	status = getaddrinfo(ip,port,&hints,&server);
-	if ( status < 0 ) {
+	if ( status != 0 ) {
 		error_msg("Could not resolve server information...");
 		clean_up(&process_id,NULL,NULL,NULL);
 		exit(1);
@@ -171,21 +88,21 @@ void start_server(char **argv) {
 	
 	/* Creates a socket descriptor to listen on */
 	perform_task("Creating socket...",NULL);
-	sock_fd = socket(server->ai_family,server->ai_socktype,server->ai_protocol);
-	if ( sock_fd < 0 ) {
+	listen_fd = socket(server->ai_family,server->ai_socktype,server->ai_protocol);
+	if ( listen_fd < 0 ) {
 		error_msg("Could not create a socket");
 		clean_up(&process_id,NULL,NULL,&server);
 		exit(1);
 	}
 
-	pass_msg("Created Socket FD:",&sock_fd);
+	pass_msg("Created Socket FD:",&listen_fd);
 
 	/* Binds the socket with port and address */
 	perform_task("Binding socket to port and address...",NULL);
-	status = bind(sock_fd,server->ai_addr,server->ai_addrlen);
+	status = bind(listen_fd,server->ai_addr,server->ai_addrlen);
 	if ( status < 0 ) {
 		error_msg("Could not bind socket to address and port");
-		clean_up(&process_id,&sock_fd,NULL,&server);
+		clean_up(&process_id,&listen_fd,NULL,&server);
 		exit(1);
 	}
 
@@ -194,10 +111,10 @@ void start_server(char **argv) {
 	/* Socket so now ready to listen to any incoming requests 
 	   Max backlog connections is 10                       */
 	perform_task("Setting up socket for listening...",NULL);
-	status = listen(sock_fd,BACKLOG);
+	status = listen(listen_fd,BACKLOG);
 	if ( status < 0 ) {
 		error_msg("Could not set up socket for listening.");
-		clean_up(&process_id,&sock_fd,NULL,&server);
+		clean_up(&process_id,&listen_fd,NULL,&server);
 		exit(1);
 	}
 
@@ -205,57 +122,59 @@ void start_server(char **argv) {
 	clean_up(NULL,NULL,NULL,&server);
 	pass_msg(NULL,NULL);
 
-	/* The socket is now waiting for any incoming connections
-	   if accepted a new socket descriptor is created      */
-	perform_task("Waiting to accept connections...",NULL);
-	client_len = sizeof(client_in);
-	client_fd = accept(sock_fd,(struct sockaddr*)&client_in,&client_len);
-	if ( client_fd < 0 ) {
-		error_msg("Could not accept the connection.");
-	}
-
-	/* Getting clients information */
-	host_ip_len = sizeof(host_ip);
-	host_port_len = sizeof(host_port);
-	status = getnameinfo((struct sockaddr*)&client_in,client_len,
-	                     host_ip, host_ip_len,
-						 host_port, host_port_len,
-						 NI_NUMERICHOST | NI_NUMERICSERV);
-	if ( status < 0 ) {
-		error_msg("Could not get host IPv4 address or Port");
-		clean_up(NULL,NULL,&client_fd,NULL);
-	}
-
-	/* Once accepted print out IPv4:Port that was accepted on server side */
-	printf("Created Client FD: %d\n",client_fd);
-	printf("Accepted connection from %s:%s\n",host_ip,host_port);
-
-	bytes = send(client_fd,welcome_message,strlen(welcome_message),0);
-	if ( bytes == -1 ) {
-		error_msg("Could not send bytes to client");	
-		clean_up(NULL,NULL,&client_fd,NULL);
-	}
-
 	while(1) {
 		
+		int done = 0;
+
 		/* Ensure the message buffers are 0 out before (re)sending data */
-		memset(recieve,0,sizeof(recieve));
+		memset(receive,0,sizeof(receive));
 		memset(response,0,sizeof(response));
-		
-		bytes = recv(client_fd,recieve,sizeof(recieve),0);
-		if ( bytes == -1 ) {
-			error_msg("Could not recieve bytes from client");
+		if (!done) {
+			/* The socket is now waiting for any incoming connections
+			   if accepted a new socket descriptor is created      */
+			perform_task("Waiting to accept connections...",NULL);
+			client_len = sizeof(client_in);
+			client_fd = accept(listen_fd,(struct sockaddr*)&client_in,&client_len);
+			if ( client_fd < 0 ) {
+				error_msg("Could not accept the connection.");
+			}
+
+			/* Getting clients information:
+			   IP & Port                 */
+			status = print_client_ip(&client_in,&client_len);
+			if ( status == -1 ) {
+				error_msg("Could not get host IPv4 address or Port");
+				clean_up(NULL,NULL,&client_fd,NULL);
+			}
+
+			/* The initial message sent to the client on how to interface
+			   with the FTP server                                     */
+			status = server_welcome_msg(&client_fd,&bytes,welcome_message);
+			if ( status != 0 ) {
+				error_msg("Could not send welcome message");
+				clean_up(NULL,NULL,&client_fd,NULL);
+			}
+			printf("Bytes sent: %zu\n",bytes);
+			done = 1;
+		}
+
+		/* This wrapper function handles the request from the client 
+		   If the request returns one of the following macros it will
+		   be sent to do_cmd function                              */
+		status = check_cmd(&client_fd,&bytes,receive);
+		if ( status == -1 ) {
+			error_msg("Invalid command: %s");
 			clean_up(NULL,NULL,&client_fd,NULL);
 		}
 
-		printf("Request: %s",recieve);
-
-		status = check_cmd(&client_fd,&bytes,recieve,response,argv);
-		if ( status == 0 || status == -1 ) {
-			break;
+		/* After function returns request do_cmd does the following
+		   cmd and sends back the data requested from the client */
+		status = do_cmd(status,&client_fd,&bytes,response,argv);
+		if ( status == 1 ) {
+			error_msg("Could not send bytes");
+			clean_up(NULL,NULL,&client_fd,NULL);
 		}
 	}
-
-	clean_up(&process_id,&sock_fd,NULL,NULL);
+	clean_up(&process_id,&listen_fd,NULL,NULL);
 }
 #endif /* End TEST_SERVER */
