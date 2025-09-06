@@ -1,24 +1,11 @@
 #if defined(SERVER)
 #include "net_utility.h"
 #include "commands.h"
+#include "server_utility.h"
 #include <netinet/in.h>
-#include <pthread.h>
 #define BACKLOG          10       /* Listen connections */
 
-/* Initial message to be sent to client after connection */
-static const char *welcome_message = 
-"-------------------------------\n"
-"|  Welcome to RPi FTP Server  |\n"
-"|-----------------------------|\n"
-"|  Use the following methods: |\n"
-"|------------------------------\n"
-"|  Download a file         |\n"
-"|  Upload a file           |\n"
-"|  List files in directory |\n"
-"|  Read file content       |\n"
-"----------------------------\n";
-
-void start_server(char *argv[]) {
+void start_server(char **argv) {
 	
 	/* Socket File Descriptors
 	   Error Validation     */
@@ -40,10 +27,14 @@ void start_server(char *argv[]) {
 
 	/* Variables need to receive and response to the client(s) 
 	   Buffer size for receive and response is 1024 bytes */
-	ssize_t bytes;
 	char receive[BUFFER];
 	char response[BUFFER];
 		
+	/* Macros needed to hold 
+	   IPv4 & Port size   */
+	char host_ip[NI_MAXHOST];
+	char host_port[NI_MAXSERV];
+
 	int done = 0;
 
 	/* Get process id of the server running */
@@ -141,48 +132,64 @@ void start_server(char *argv[]) {
 			}
 
 			/* Getting clients information:
-			   IP & Port                 */
-			status = print_client_ip(&client_in,&client_len);
-			if ( status == -1 ) {
+			   IP & Port                */
+			status = print_client_ip(host_ip,sizeof(host_ip),
+			                         host_port,sizeof(host_port),
+									 &client_in,&client_len);
+			if ( status == ERROR ) {
 				error_msg("Could not get host IPv4 address or Port");
 				clean_up(NULL,NULL,&client_fd,NULL);
 			}
 
 			/* The initial message sent to the client on how to interface
 			   with the FTP server                                     */
-			status = server_welcome_msg(&client_fd,&bytes,welcome_message);
+			status = server_welcome_msg(client_fd);
 			if ( status != 0 ) {
 				error_msg("Could not send welcome message");
+				disconnect_host(host_ip,host_port);
 				clean_up(NULL,NULL,&client_fd,NULL);
 			}
-			printf("Bytes sent: %zu\n",bytes);
+
 			done = 1;
 		}
 
 		/* This wrapper function handles the request from the client 
 		   If the request returns one of the following macros it will
 		   be sent to do_cmd function                              */
-		status = check_cmd(&client_fd,&bytes,receive);
-		if ( status == -1 ) {
-			fprintf(stderr,"Invalid command: %s\n",receive);
+		status = check_cmd(client_fd,receive,sizeof(receive));
+		if ( status == ERROR ) {
+			send_exit_cmd(client_fd,receive,response,sizeof(response));
+			error_msg("Invalid command");
+			disconnect_host(host_ip,host_port);
 			clean_up(NULL,NULL,&client_fd,NULL);
 			done = 0;
 		}
 
 		/* After function returns request do_cmd does the following
 		   cmd and sends back the data requested from the client */
-		status = do_cmd(status,&client_fd,&bytes,response,argv);
-		if ( status == -1 ) {
-			error_msg("Could not send bytes");
+		status = do_cmd(status,client_fd,response,sizeof(response),receive,argv);
+		if ( status == ERROR ) {
+			send_exit_cmd(client_fd,NULL,response,sizeof(response));
+			error_msg("Unable to send a response to client");
+			disconnect_host(host_ip,host_port);
 			clean_up(NULL,NULL,&client_fd,NULL);
 			done = 0;
-		} else if ( status == 0 ) {
-			pass_msg(NULL,NULL);
+		} else if ( status == ER_OVERFLOW ) {
+			send_exit_cmd(client_fd,NULL,response,sizeof(response));
+			error_msg("Buffer over flow... size too large");
+			disconnect_host(host_ip,host_port);
+			clean_up(NULL,NULL,&client_fd,NULL);
+			done = 0;
+		} else if ( status == ER_BYTES ) {
+			send_exit_cmd(client_fd,NULL,response,sizeof(response));
+			error_msg("Buffer over flow... size too large");
+			disconnect_host(host_ip,host_port);
 			clean_up(NULL,NULL,&client_fd,NULL);
 			done = 0;
 		}
 	}
-
+	
+	printf("Server shutting down...\n");
 	clean_up(&process_id,&listen_fd,NULL,NULL);
 }
 #endif /* End TEST_SERVER */

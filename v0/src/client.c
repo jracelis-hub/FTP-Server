@@ -1,5 +1,18 @@
 #if defined(CLIENT)
 #include "net_utility.h"
+int check_for_exit(char *receive) {
+
+	char *found;
+	const char *token = "\r\n";
+
+	found = strstr(receive,token);
+
+	if (found != NULL) {
+		return ERROR;		
+	}
+	return 0;
+}
+
 void start_client(char **argv) {
 	
 	/* Socket File Descriptors
@@ -82,6 +95,7 @@ void start_client(char **argv) {
 	clean_up(NULL,NULL,NULL,&server);
 
 	printf("Connected to %s:%s\n",argv[1],argv[2]);
+
 	/* Begin Data transfering */
 	while(1) {
 
@@ -92,34 +106,16 @@ void start_client(char **argv) {
 		bytes = recv(sock_fd,receive,sizeof(receive),0);
 		if ( bytes == -1 ) {
 			error_msg("Could not receive bytes from server");
-			close(sock_fd);
+			clean_up(&process_id,&sock_fd,NULL,NULL);
 			exit(1);
 		}
+
 		printf("Received bytes: %zu\n",bytes);
 		printf("%s",receive);
 
-		if (strncmp(receive,"Request: Download\n",18) == 0) {
-			printf("Transfer complete\n");
-			printf("Closing connection...\n");
-			break;
-		} else if ( strncmp(receive,"Request: Upload\n",16) == 0 ) {
-			printf("Transfer complete\n");
-			printf("Closing connection...\n");
-			bytes = send(sock_fd,response,strnlen(response,BUFFER),0);
-			if ( bytes == -1 ) {
-				error_msg("Could not receive bytes from server");
-				clean_up(NULL,&sock_fd,NULL,NULL);
-				exit(1);
-		}
-			break;
-		} else if ( strncmp(receive,"Request: List\n",15) == 0 ) {
-			continue;
-		} else if ( strncmp(receive,"Request: Read\n",14) == 0 ) {
-			continue;
-		} else if (strncmp(receive,"Invalid\n",8) == 0) {
-			error_msg("Invalid request from server... Closing connection");
-			clean_up(NULL,&sock_fd,NULL,NULL);
-			exit(1);
+		status = check_for_exit(receive);
+		if ( status == ERROR ) {
+			break;	
 		}
 
 		printf("$ ");
@@ -127,12 +123,12 @@ void start_client(char **argv) {
 		bytes = send(sock_fd,response,strnlen(response,BUFFER),0);
 		if ( bytes == -1 ) {
 			error_msg("Could not receive bytes from server");
-			clean_up(NULL,&sock_fd,NULL,NULL);
+			clean_up(&process_id,&sock_fd,NULL,NULL);
 			exit(1);
 		}
 	}
 
 	perform_task("Process killed:",(int *)&process_id);
-	clean_up(NULL,&sock_fd,NULL,NULL);
+	clean_up(&process_id,&sock_fd,NULL,NULL);
 }
 #endif /* End TEST_CLIENT */

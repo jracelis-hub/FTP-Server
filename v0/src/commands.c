@@ -1,45 +1,101 @@
 #include "commands.h"
 #include "net_utility.h"
+#include "command_utility.h"
 #include <dirent.h>
+#include <fcntl.h>
 
-int server_welcome_msg(int *client_fd,ssize_t *bytes,const char *welcome_msg) {
+int check_cmd(int client_fd,char *receive,size_t receive_buffer) {
 
-	*bytes = send(*client_fd,welcome_msg,strlen(welcome_msg),0);
-	if ( *bytes < 0 ) { return -1; }
-	return 0;
-}
-
-int print_client_ip(struct sockaddr_in *client_in,socklen_t *client_len) {
-
-	/* Macros needed to hold 
-	   IPv4 & Port size   */
-	char host_ip[NI_MAXHOST];
-	socklen_t host_ip_len;
-	char host_port[NI_MAXSERV];
-	socklen_t host_port_len;
-
-	host_ip_len = sizeof(host_ip);
-	host_port_len = sizeof(host_port);
-	if ( getnameinfo((struct sockaddr*)client_in,*client_len,
-					 host_ip, host_ip_len,
-					 host_port, host_port_len,
-					 NI_NUMERICHOST | NI_NUMERICSERV) != 0 ) { return -1; }
-
-	/* Once accepted print out IPv4:Port that was accepted on server side */
-	printf("Accepted connection from %s:%s\n",host_ip,host_port);
-
-	return 0;
-}
-
-void list_cmd(char *response,char **dir_name) {
+	ssize_t bytes;
 	
+	bytes = recv(client_fd,receive,receive_buffer,0);
+	if ( bytes == ERROR ) {
+		error_msg("Could not receive bytes from client");
+		return ER_BYTES;
+	}
+
+	printf("Bytes received: %zu\n",bytes);
+	printf("Request: %s",receive);
+
+	/* The request from client will compare to one of these 4 commands
+	   if the results are not one of the macros then it will return a 
+	   fail -1                                                      */
+	char *cmd[] = {"Download;",
+	               "Upload;",
+				   "List;",
+				   "Read;"};
+
+	if (!strncmp(receive,cmd[0],strlen(cmd[0]))) {
+		return DOWNLOAD;
+	} else if (!strncmp(receive,cmd[1],strlen(cmd[1]))) {
+		return UPLOAD;
+	} else if (!strncmp(receive,cmd[2],strlen(cmd[2]))) {
+		return LIST;
+	} else if (!strncmp(receive,cmd[3],strlen(cmd[3]))) {
+		return READ;
+	} else {
+		receive[bytes-1] = '\0';
+		return ERROR;
+	}
+}
+
+
+int read_cmd(int client_fd,char *file,char *response,size_t response_len,char **dir_name) {
+
+	ssize_t read_bytes;
+	ssize_t send_bytes;
+	int fd;
+	char file_read[256];
+	char temp_buffer[BUFFER];
+
+	memset(temp_buffer,0,BUFFER);
+	
+	snprintf(file_read,sizeof(file_read),"%s/%s",dir_name[3],file);
+	fd = open(file_read,O_RDONLY);
+	if ( fd == ERROR ) {
+		error_msg("Could not open file");
+		return ER_MISFILE;
+	}
+
+	lseek(fd,0,SEEK_SET);
+
+	read_bytes = read(fd,temp_buffer,BUFFER);
+	if ( read_bytes < 0 || read_bytes > BUFFER-3) {
+		return ER_BYTES;
+	}
+	
+	printf("%zu\n",read_bytes);
+
+	snprintf(response,response_len,"%s\r\n",temp_buffer);
+
+	send_bytes = send(client_fd,response,strlen(response),0);
+	if ( send_bytes < 0 ) {
+		return ER_BYTES;
+	}
+
+	return 0;
+}
+
+int list_cmd(int client_fd,char *response,size_t response_buffer,char **dir_name) {
+	
+	char list_status[] = "Request: List;\nStatus: Okay\nFiles:\n";
+
 	DIR *dir_fd;
 	struct dirent *directory;
+	ssize_t bytes;
 
+	const int buffer = 4056;
+	char temp_buffer[buffer];
+	size_t buffer_cap = 0;
+
+	memset(temp_buffer,0,sizeof(temp_buffer));
+	buffer_cap = strlen(list_status);
+	
 	/* Open directory to read from */
 	dir_fd = opendir(dir_name[3]);
 	if ( dir_fd == NULL ) {
 		error_msg("Could not open directory");
+		return ER_MISFILE;
 	}
 
 	/* Read each file name that is in the directory not including . .. or .dotfiles */
@@ -48,92 +104,91 @@ void list_cmd(char *response,char **dir_name) {
 		     strcmp(directory->d_name,"..") == 0 ||
 			 strncmp(directory->d_name,".",1) == 0) { continue; }
 
-		strncat(response,directory->d_name,256);
-		strcat(response,"\n");
+		buffer_cap += strlen(directory->d_name) + 1;
+		if ( buffer_cap >= response_buffer ) {
+			error_msg("Buffer overflow");
+			return ER_OVERFLOW;
+		}
+
+		strcat(temp_buffer,directory->d_name);
+		strcat(temp_buffer,"\n");
 	}
 
 	/* Close the open directory descriptor */
 	closedir(dir_fd);
+
+	printf("Response buffer = %ld\n",response_buffer - buffer_cap);
+	printf("Buffer cap = %ld\n",buffer_cap);
+	
+	snprintf(response,response_buffer,"%s%s",list_status,temp_buffer);
+	bytes = send(client_fd,response,strnlen(response,response_buffer)+1,0);
+	if ( bytes == -1 ) {
+		error_msg("Unable to send a response to client");
+		return ER_BYTES;
+	}
+
+	return 0;
 } 
 
-void download_cmd(char *file_name,char *response) {
-	int fd;
+void send_exit_cmd(int client_fd,char *receive,char *response,size_t response_buffer) {
 
-	fd = open(file_name,O_RDONLY);
+	ssize_t bytes;
+	static const char *disconnect_msg = "Disconnecting from server...";
+	static const char *invalid = "Status: Invalid";
+	static const char *exit = "\r\n";
 	
-}
-
-int check_cmd(int *client_fd,ssize_t *bytes,char *receive) {
-
-	*bytes = recv(*client_fd,receive,sizeof(receive),0);
-	if ( *bytes == -1 ) {
-		error_msg("Could not receive bytes from client");
+	snprintf(response,response_buffer,"Request: %s\n%s\n%s%s"
+	                                  ,receive,invalid,disconnect_msg,exit);
+	bytes = send(client_fd,response,strnlen(response,response_buffer)+1,0);
+	if ( bytes == -1 ) {
+		return;
 	}
 
-	printf("Bytes received: %zu\n",*bytes);
-	printf("Request: %s",receive);
-
-	/* The request from client will compare to one of these 4 commands
-	   if the results are not 0 then it will return a fail -1 */
-	char *cmd[] = {"Download\n","Upload\n","List\n","Read\n" };
-
-	if (!strncmp(receive,cmd[0],9)) {
-		return DOWNLOAD;
-	} else if (!strcmp(receive,cmd[1])) {
-		return UPLOAD;
-	} else if (!strcmp(receive,cmd[2])) {
-		return LIST;
-	} else if (!strcmp(receive,cmd[3])) {
-		return READ;
-	} else {
-		return -1;
-	}
-}
-
-int do_cmd(int status,int *client_fd,ssize_t *bytes,char *response,char **dir_name) {
-
-	char *statuses[] = {"Request: Download\nStatus: Okay\nFile: random.txt\n",
-                        "Request: Upload\nStatus: Okay\nFile: random.txt\n",
-					    "Request: List\nStatus: Okay\nFiles:\n",
-					    "Request: Read\nStatus: Okay\nFile:\n" };
-
-		if ( status == DOWNLOAD ) {
-			strncpy(response,statuses[0],BUFFER);
-			
-			*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
-			if ( *bytes == -1 ) {
-				error_msg("Unable to send a response to client");
-				return -1;
-			}
-		} else if ( status == UPLOAD ) {
-			strncpy(response,statuses[1],BUFFER);
-
-			*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
-			if ( *bytes == -1 ) {
-				error_msg("Unable to send a response to client");
-				return -1;
-			}
-		} else if ( status == LIST ) { 
-
-			strncpy(response,statuses[2],BUFFER);
-
-			/* Preform the list command */
-			list_cmd(response,dir_name);
-
-			*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
-			if ( *bytes == -1 ) {
-				error_msg("Unable to send a response to client");
-				return -1;
-			}
-			return 1;
-		} else if ( status == READ ) {
-			strncpy(response,statuses[3],BUFFER);
-			*bytes = send(*client_fd,response,strnlen(response,BUFFER),0);
-			if ( *bytes == -1 ) {
-				error_msg("Unable to send a response to client");
-				return -1;
-			}
-			return 1;
+	if ( receive == NULL ) {
+		snprintf(response,response_buffer,"%s",exit);
+		bytes = send(client_fd,response,strnlen(response,response_buffer)+1,0);
+		if ( bytes == -1 ) {
+			return;
 		}
-		return 0;
+	}
+}
+
+int do_cmd(int cmd_status,int client_fd,char *response,size_t response_buffer,char *receive,char **dir_name) {
+
+	int status;
+	const int file_buff = 128;
+	char file[file_buff];
+
+	if ( cmd_status != LIST ) {
+		parse_cmd(cmd_status,file,sizeof(file),receive,dir_name);
+	}
+
+	if ( cmd_status == DOWNLOAD ) {
+
+	} 
+	else if ( cmd_status == UPLOAD ) {
+
+	} 
+	else if ( cmd_status == LIST ) { 
+
+		/* Preform the list command */
+		status = list_cmd(client_fd,response,response_buffer,dir_name);
+		if ( status == ER_OVERFLOW ) {
+			return ER_OVERFLOW;
+		} else if ( status == ERROR ) {
+			return ERROR;
+		}
+	} 
+	else if ( cmd_status == READ ) {
+
+		/* Preform the reading command */
+		status = read_cmd(client_fd,file,response,response_buffer,dir_name);
+		if ( status == ERROR ) {
+			return ERROR;
+		} if ( status == ER_BYTES) {
+			return ER_BYTES;
+		}
+	}
+
+	return 0;
 }

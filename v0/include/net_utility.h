@@ -23,12 +23,16 @@
 #define IP_MAX_LEN       16	      /* xxx.xxx.xxx.xxx + \0 */
 #define PORT_MAX_LEN      6	      /* xxxxx + \0 */
 #define IP_MIN_LEN        8       /* 10.0.0.0 */
-#define REQUEST_TYPE      4
-#define STATUS_TYPE       3
+
+/* Error Codes */
+#define ERROR            -1
+#define ER_OVERFLOW      -2
+#define ER_MISFILE       -3
+#define ER_BYTES         -4
 
 /* Functions Prototypes */
 void format(int count,const char character);
-void usage(char *argv[]);
+void usage(char **argv);
 void perform_task(const char *task_msg,int *task_id);
 void clean_up(pid_t *proc_id,int *sock_fd,int *client_fd,struct addrinfo **server ); /* If the follow does not need freeing put value as NULL */
 void error_msg(const char *message);

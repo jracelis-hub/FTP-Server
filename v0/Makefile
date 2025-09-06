@@ -9,7 +9,7 @@ T_OBJ_DIR=$(BUILD_DIR)/t_obj
 # ---------- Source Files ---------- #
 # S = Server
 # C = Client
-S_SRC=main.c net_utility.c server.c commands.c
+S_SRC=main.c net_utility.c server.c commands.c server_utility.c command_utility.c
 C_SRC=main.c net_utility.c client.c
 
 S_SRCD:=$(addprefix $(SRC_DIR),$(S_SRC))
@@ -30,7 +30,7 @@ CC=gcc
 CLIENT_D=-DCLIENT
 SERVER_D=-DSERVER
 INC_FLAG=-I$(INC_DIR)
-CFLAGS=-Wall -Wextra
+CFLAGS=-Wall -Werror
 
 # ----------- Running Variables ----------- #
 LOCAL?=127.0.0.1
