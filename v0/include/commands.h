@@ -20,10 +20,10 @@ int do_cmd(int cmd_status,int client_fd,char *response,size_t response_buffer,ch
 /* ---------- Upload Command ------------ */
 
 /* ---------- List Command ------------ */
-int list_cmd(int client_fd,char *response,size_t response_buffer,char **dir_name);
+int list_cmd(int client_fd,char *request,char *response,size_t response_buffer,char **dir_name);
 
 /* ---------- Read Command ------------ */
-int read_cmd(int client_fd,char *file,char *response,size_t response_len,char **dir_name);
+int rod_cmd(int client_fd,char *file,char *request,char *response,size_t response_len,char **dir_name);
 
 /* ---------- Exit Command ------------ */
 void send_exit_cmd(int client_fd,char *receive,char *response,size_t response_buffer);

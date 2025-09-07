@@ -21,7 +21,7 @@ Since I have been working with Unix based systems, I wanted to design this progr
 
 The network stack, consist of using **TCP** and will only support IPv4... but with a couple tweeks it could also support IPv6. The purpose of using **TCP** is to ensure the proper data is transfered over the network with consistent reliability. 
 
-For handling multiple connections, I went with pthreads threads approach. Since, the amount requests client devices is less than 10 on my private network. This would satisfy the performance needs without being too overkill and on using other APIs like `select()` or `poll()`. If scalability was a requirement then I would go with an alternative approach.
+For handling multiple connections, I went with pthreads threads approach. Since, the amount requests client devices is less than 10 on my private network. There are altnative approaches using event based APIs like `select()` or `poll()` for a more scalable approach.
 
 Although encryption is essential when sending data over the internet for security and privacy, this program will not include it as the transfers be within my _LAN_ (local area network).
 
@@ -33,13 +33,13 @@ The hosts are broken down to the client <-> server model.
 
 The server being the FTP server (replier) and client is the user (requestor).
 
-The server will be listen on a its own configured port and will wrap around a specific directory on the server.
+The server will be listen on a its own configured port and will be _"mounted"_ around a specified directory on the server.
 
 Using the base set of rules and structure, the flow consists of the Data Transfer Process (DTP) and Command Process (CP).
 
-**Data Transfer Process** - the process of the server sending over requested information from the client (user).
+**Data Transfer Process** - the process of the server sending over requested information from the client(user).
 
-**Command Process** - a set of requested commands from the user to determine the correct data transfer process
+**Command Process** - a set of commands that the client(user) requests to determine the correct data transfer process.
 
 <table>
 	<thead align="center">
@@ -71,8 +71,9 @@ Using the base set of rules and structure, the flow consists of the Data Transfe
 	</tbody>
 </table>
 
-## Requirements
+The information of 
 
+## Requirements
 
 To run the following program a linux environment is needed. I have tested this on WSL (Windows Subsystem for Linux) and Debian-based Linux distributions such as Ubuntu and Raspbian (Raspberry Pi OS).
 

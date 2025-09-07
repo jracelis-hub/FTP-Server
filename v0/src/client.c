@@ -1,5 +1,7 @@
 #if defined(CLIENT)
 #include "net_utility.h"
+#include "interpret_command.h"
+
 int check_for_exit(char *receive) {
 
 	char *found;
@@ -103,11 +105,10 @@ void start_client(char **argv) {
 		memset(receive,0,sizeof(receive));
 		memset(response,0,sizeof(response));
 
-		bytes = recv(sock_fd,receive,sizeof(receive),0);
-		if ( bytes == -1 ) {
-			error_msg("Could not receive bytes from server");
-			clean_up(&process_id,&sock_fd,NULL,NULL);
-			exit(1);
+		status = interpret_cmd(sock_fd,receive,sizeof(receive));
+		if ( status != 0 ) {
+			error_msg("Could not interpret_cmd");
+			break;
 		}
 
 		printf("Received bytes: %zu\n",bytes);

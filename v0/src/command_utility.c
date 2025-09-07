@@ -13,14 +13,12 @@ void remove_spaces(char *name,size_t name_len) {
 	name[s] = '\0';
 }
 
-void parse_cmd(int cmd_status,char *file,size_t file_s,char *receive,char **dir_name) {
+void parse_cmd(char *file,size_t file_s,char *request,size_t request_s,char *receive) {
 	
-	const int request_buffer = 16;
-	char request[request_buffer];
-
 	/* Grabs input from client and parses it into 
 	   request: 
 	   file:                                   */
-	sscanf(receive,"%[A-Za-z];%[^;\n]",request,file);
+	sscanf(receive,"%[A-Za-z ];%[^;\n]",request,file);
+	remove_spaces(request,request_s);
 	remove_spaces(file,file_s);
 }

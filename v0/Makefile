@@ -10,7 +10,7 @@ T_OBJ_DIR=$(BUILD_DIR)/t_obj
 # S = Server
 # C = Client
 S_SRC=main.c net_utility.c server.c commands.c server_utility.c command_utility.c
-C_SRC=main.c net_utility.c client.c
+C_SRC=main.c net_utility.c client.c interpret_command.c
 
 S_SRCD:=$(addprefix $(SRC_DIR),$(S_SRC))
 C_SRCD:=$(addprefix $(SRC_DIR),$(C_SRC))

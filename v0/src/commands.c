@@ -6,13 +6,9 @@
 
 int check_cmd(int client_fd,char *receive,size_t receive_buffer) {
 
-	ssize_t bytes;
-	
-	bytes = recv(client_fd,receive,receive_buffer,0);
+	ssize_t bytes = recv(client_fd,receive,receive_buffer,0);
 	if ( bytes == ERROR ) {
-		error_msg("Could not receive bytes from client");
-		return ER_BYTES;
-	}
+		error_msg("Could not receive bytes from client"); return ER_BYTES; }
 
 	printf("Bytes received: %zu\n",bytes);
 	printf("Request: %s",receive);
@@ -39,19 +35,67 @@ int check_cmd(int client_fd,char *receive,size_t receive_buffer) {
 	}
 }
 
+int do_cmd(int cmd_status,int client_fd,char *response,size_t response_buffer,char *receive,char **dir_name) {
 
-int read_cmd(int client_fd,char *file,char *response,size_t response_len,char **dir_name) {
+	int status;
 
-	ssize_t read_bytes;
-	ssize_t send_bytes;
-	int fd;
+	/* The following variables are needed to parse the command */
+	const int file_buff = 128;
+	const int request_buff = 32;
+	char request[request_buff];
+	char file[file_buff];
+
+	parse_cmd(file,sizeof(file),request,sizeof(request),receive);
+
+	if ( cmd_status == DOWNLOAD ) {
+		status = rod_cmd(client_fd,file,request,response,response_buffer,dir_name);
+		if ( status == ERROR ) {
+			return ERROR;
+		} if ( status == ER_BYTES ) {
+			return ERROR;
+		}
+
+	} 
+	else if ( cmd_status == UPLOAD ) {
+
+	} 
+	else if ( cmd_status == LIST ) { 
+
+		/* Preform the list command */
+		status = list_cmd(client_fd,request,response,response_buffer,dir_name);
+		if ( status == ER_OVERFLOW ) {
+			return ER_OVERFLOW;
+		} else if ( status == ERROR ) {
+			return ERROR;
+		}
+	} 
+	else if ( cmd_status == READ ) {
+
+		/* Preform the reading command */
+		status = rod_cmd(client_fd,file,request,response,response_buffer,dir_name);
+		if ( status == ERROR ) {
+			return ERROR;
+		} if ( status == ER_BYTES) {
+			return ER_BYTES;
+		}
+	}
+
+	return 0;
+}
+
+int rod_cmd(int client_fd,char *file,char *request,char *response,size_t response_len,char **dir_name) {
+
+	/* To hold the directory+name */
 	char file_read[256];
+	/* This is to store temporary bytes before sending to socket */
 	char temp_buffer[BUFFER];
+
+	long overflow_meter = BUFFER;
 
 	memset(temp_buffer,0,BUFFER);
 	
 	snprintf(file_read,sizeof(file_read),"%s/%s",dir_name[3],file);
-	fd = open(file_read,O_RDONLY);
+	int fd = open(file_read,O_RDONLY);
 	if ( fd == ERROR ) {
 		error_msg("Could not open file");
 		return ER_MISFILE;
@@ -59,24 +103,59 @@ int read_cmd(int client_fd,char *file,char *response,size_t response_len,char **
 
 	lseek(fd,0,SEEK_SET);
 
-	read_bytes = read(fd,temp_buffer,BUFFER);
-	if ( read_bytes < 0 || read_bytes > BUFFER-3) {
-		return ER_BYTES;
-	}
-	
-	printf("%zu\n",read_bytes);
+	overflow_meter -= strlen(file);
 
-	snprintf(response,response_len,"%s\r\n",temp_buffer);
+	if (strcmp(request,"Read") == 0 ) {
 
-	send_bytes = send(client_fd,response,strlen(response),0);
-	if ( send_bytes < 0 ) {
-		return ER_BYTES;
+		const char *read_header = "Request: Read\nStatus: Okay\nFile: ";
+		const char *format = "\n\r\n";
+		
+		overflow_meter -= strlen(format);
+		overflow_meter -= strlen(read_header);
+
+		ssize_t read_bytes = read(fd,temp_buffer,BUFFER);
+		overflow_meter -= read_bytes;
+		if ( read_bytes < 0 || overflow_meter < 1) {
+			return ER_BYTES;
+		}
+		
+		printf("%zu\n",read_bytes);
+
+		snprintf(response,response_len,"%s%s\n%s\r\n",read_header,file,temp_buffer);
+
+		ssize_t send_bytes = send(client_fd,response,strlen(response),0);
+		if ( send_bytes < 0 ) {
+			return ER_BYTES;
+		}
+	} else if ( strcmp(request,"Download") == 0 ) {
+
+		const char *download_header = "Request: Download\nStatus: Okay\nFile:";
+		const char *format = "\r\n";
+
+		overflow_meter -= strlen(format);
+		overflow_meter -= strlen(download_header);
+
+		ssize_t read_bytes = read(fd,temp_buffer,BUFFER);
+		if ( read_bytes < 0 || overflow_meter < 1) {
+			return ER_BYTES;
+		}
+		
+		printf("%zu\n",read_bytes);
+
+		snprintf(response,response_len,"%s%s\n%s\r\n",download_header,file,temp_buffer);
+
+		ssize_t send_bytes = send(client_fd,response,strlen(response),0);
+		if ( send_bytes < 0 ) {
+			return ER_BYTES;
+		}
 	}
+
+	close(fd);
 
 	return 0;
 }
 
-int list_cmd(int client_fd,char *response,size_t response_buffer,char **dir_name) {
+int list_cmd(int client_fd,char *request,char *response,size_t response_buffer,char **dir_name) {
 	
 	char list_status[] = "Request: List;\nStatus: Okay\nFiles:\n";
 
@@ -108,6 +187,7 @@ int list_cmd(int client_fd,char *response,size_t response_buffer,char **dir_name
 		if ( buffer_cap >= response_buffer ) {
 			error_msg("Buffer overflow");
 			return ER_OVERFLOW;
+
 		}
 
 		strcat(temp_buffer,directory->d_name);
@@ -153,42 +233,3 @@ void send_exit_cmd(int client_fd,char *receive,char *response,size_t response_bu
 	}
 }
 
-int do_cmd(int cmd_status,int client_fd,char *response,size_t response_buffer,char *receive,char **dir_name) {
-
-	int status;
-	const int file_buff = 128;
-	char file[file_buff];
-
-	if ( cmd_status != LIST ) {
-		parse_cmd(cmd_status,file,sizeof(file),receive,dir_name);
-	}
-
-	if ( cmd_status == DOWNLOAD ) {
-
-	} 
-	else if ( cmd_status == UPLOAD ) {
-
-	} 
-	else if ( cmd_status == LIST ) { 
-
-		/* Preform the list command */
-		status = list_cmd(client_fd,response,response_buffer,dir_name);
-		if ( status == ER_OVERFLOW ) {
-			return ER_OVERFLOW;
-		} else if ( status == ERROR ) {
-			return ERROR;
-		}
-	} 
-	else if ( cmd_status == READ ) {
-
-		/* Preform the reading command */
-		status = read_cmd(client_fd,file,response,response_buffer,dir_name);
-		if ( status == ERROR ) {
-			return ERROR;
-		} if ( status == ER_BYTES) {
-			return ER_BYTES;
-		}
-	}
-
-	return 0;
-}
