@@ -74,6 +74,8 @@ int main(int argc, char *argv[]) {
 
 	printf("Connected to %s:%s\n",argv[1],argv[2]);
 
+	int done = 0;
+
 	while (1) {
 
 		memset(reply,0,sizeof(reply));
@@ -84,20 +86,19 @@ int main(int argc, char *argv[]) {
 			error_msg("Could not receive response from server");
 			close(sock_fd);
 			return -1;
+		} else if ( status == 2 ) {
+			perform_task("Closing connection no more bytes received",NULL);
+			break;
 		}
 
-		status = check_for_exit(request);
-		if ( status == 0 ) {
-			printf("Ending connection\n");
-			close(sock_fd);
-			return 0;
-		}
-
-		status = send_request(sock_fd,reply,sizeof(reply));
-		if ( status < 0 ) {
-			error_msg("Could not send response to server");
-			close(sock_fd);
-			return -1;
+		if (!done) {
+			status = send_request(sock_fd,reply,sizeof(reply));
+			if ( status < 0 ) {
+				error_msg("Could not send response to server");
+				close(sock_fd);
+				return -1;
+			}
+			done = 1;
 		}
 	}
 

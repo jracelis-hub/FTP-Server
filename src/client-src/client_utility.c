@@ -3,22 +3,13 @@
 #include <string.h>
 #include <sys/socket.h>
 
-int check_for_exit(char *request) {
-
-	const char *token = "\r\n";
-	char *found = strtok(request,token);
-	if ( found == NULL ) {
-		return 0;	
-	}
-
-	return -1;
-}
-
 int get_request(int sock_fd,char *request,size_t request_s) {
 
 	ssize_t bytes = recv(sock_fd,request,request_s,0);
 	if ( bytes < 0 ) {
 		return -1;
+	} else if ( bytes == 0 ) {
+		return 2;
 	}
 
 	printf("Received: %zu bytes\n",bytes);

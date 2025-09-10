@@ -2,11 +2,13 @@
 #define NET_UTILITY_H
 #include <unistd.h>
 
-#define BUFFER 4056
+#define BUFFER 4096 /* 4kb */
 #define ERROR -1
 #define ER_BYTES -2
 #define ER_CMD -3
 #define ER_FILE -4
+#define ER_PARSE -5
+#define ER_OVERFLOW -6
 
 void format(int count,const char character);
 void usage(char *argv[]);
