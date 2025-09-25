@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 #include "client-commands.h"
-#include "command_utility.h"
+#include "parsing.h"
 
 #define BUFFER 1024
 
