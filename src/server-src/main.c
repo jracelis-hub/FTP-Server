@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
 	}
 #endif
 
-	pass();
+	pass_msg();
 
 	perform_msg("Binding socket to port and address...");
 #if defined(INET)
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 	}
 #endif
 
-	pass();
+	pass_msg();
 
 	perform_msg("Listening for incoming connections...");
 	if (server_listen_on_socket(listen_fd) < 0) {

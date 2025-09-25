@@ -27,7 +27,7 @@ void perform_msg(const char *message)
 	printf("%s\n", message);
 }
 
-void pass(void) 
+void pass_msg(void) 
 {
 	int count = 35;	
 	for (int i = 0; i < count; i++) 

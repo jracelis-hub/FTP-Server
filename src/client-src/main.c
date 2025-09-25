@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	pass();
+	pass_msg();
 
 	printf("Attempting to connect to server...\n");
 	if (client_connect_to_server(socket_fd, &server, port, argv[1]) < 0)
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	pass();
+	pass_msg();
 
 	printf("Connected to %s:%s\n", argv[1], argv[2]);
 

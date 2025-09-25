@@ -21,7 +21,7 @@ void usage(char *program);
 /* logging for error message and performing a task */
 void error_msg(const char *message);
 void perform_msg(const char *message);
-void pass(void);
+void pass_msg(void);
 
 /* Used just for creating a line of characters */
 void format(int count, const char character);
