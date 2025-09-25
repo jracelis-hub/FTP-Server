@@ -1,4 +1,5 @@
 /* Standard Headers */
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -34,6 +35,7 @@ int main(int argc, char *argv[]) {
 		error_msg("Over flow on directory buffer");
 		return -1;
 	}
+	printf("%s\n", directory);
 
 /* Setting up socket structure to hold IPv4 or IPv6
  * and port                                      */

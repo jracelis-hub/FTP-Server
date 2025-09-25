@@ -12,7 +12,7 @@ int command_handler(thread_handler_t *thread_handle);
 
 int command_handle_list(thread_handler_t *thread_handle);
 int command_handle_upload(char *request, char *reply, size_t reply_size, char *directory);
-int command_handle_read(char *request, char *reply, size_t reply_size, char *directory);
+int command_handle_read(thread_handler_t *thread_handle);
 
 char *command_strip_header(char *payload);
 char *command_strip_request(char *command);

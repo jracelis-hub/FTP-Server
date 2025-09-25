@@ -158,28 +158,12 @@ int command_handle_upload(char *request, char *reply, size_t reply_size, char *d
 	return SUCCESS;
 }
 
-int command_handle_read(char *request, char *reply, size_t reply_size, char *directory)
+int command_handle_read(thread_handler_t *thread_handle)
 {
-	/* File_path will hold the value of the directory (argv[2]) 
-	 * + the file that wants to be read from the client 
-	 * /home/something/filemention.txt                       */
-	char file_path[256] = {0};
-	size_t file_path_len = sizeof(file_path);
-
-	/* File will hold the value of file requested from the client */
-	char file[64] = {0}; 
-
 	/* Command strip path will take the request:
 	 * Read; file.txt and strip off the request 
 	 * and place file.txt into the buffer file   */
-	command_get_file(request, file, sizeof(file));
-
-	/* isdirectoryformat checks if there is an appending / at the end
-	 * of the * directory if not a / is appended to the end        */
-	if (!isdirectoryformat(file_path))
-		snprintf(file_path, file_path_len, "%s/%s", directory, file);
-	else
-		snprintf(file_path, file_path_len, "%s%s", directory, file);
+	command_get_file(thread_handle->request, file, sizeof(file));
 
 	int fd = open(file_path, O_RDONLY);
 	if (fd == -1) return ERROR_FILE;

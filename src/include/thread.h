@@ -4,6 +4,7 @@
 /* 8 kb of buffer size */
 #define MINUMUM_BUFFER_SIZE 8192
 #define FILE_PATH_SIZE 128
+#define DIRECTORY_SIZE 64
 
 #include <sys/types.h> /* ssize_t */
 #include <sys/socket.h> /* struct sockaddr_storage */
@@ -20,7 +21,7 @@ typedef struct thread_handler_t {
 	command_t command;
 	char request[MINUMUM_BUFFER_SIZE];
 	char reply[MINUMUM_BUFFER_SIZE];
-	char directory[MINUMUM_BUFFER_SIZE];
+	char directory[DIRECTORY_SIZE];
 	char file[FILE_PATH_SIZE];
 	size_t request_size;
 	size_t reply_size;

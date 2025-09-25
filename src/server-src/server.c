@@ -122,6 +122,7 @@ int server_set_directory(char *directory, size_t directory_size, char *directory
 		strcat(directory, "/");
 		return SUCCESS;
 	} else if (directory_arg[dir_arg_len - 1] == '/') {
+		strcpy(directory, directory_arg);
 		return SUCCESS;
 	}
 	return ERROR_DIR;

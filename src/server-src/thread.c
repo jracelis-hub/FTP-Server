@@ -181,8 +181,9 @@ int thread_print_disconnect_message(struct sockaddr_storage *client_address)
 	if (getnameinfo((struct sockaddr *)client_address, addrlen,
 	            client_ip, len_ip,
 				client_port, len_port,
-				NI_NUMERICHOST | NI_NUMERICSERV) != 0)
+				NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
 		return ERROR_NAMEINFO;
+	}
 
 	printf("Disconnect from %s:%s\n", client_ip, client_port);
 
@@ -200,8 +201,9 @@ int thread_print_accept_connection_message(struct sockaddr_storage *client_addre
 	if (getnameinfo((struct sockaddr *)client_address, addrlen,
 	            client_ip, len_ip,
 				client_port, len_port,
-				NI_NUMERICHOST | NI_NUMERICSERV) != 0)
+				NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
 		return ERROR_NAMEINFO;
+	}
 
 	printf("Accepted connection from %s:%s\n", client_ip, client_port);
 
