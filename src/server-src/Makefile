@@ -1,7 +1,7 @@
 # Compiler
 CC=gcc
 WFLAGS=-Wall -Werror
-INCLUDE=-I../../include
+INCLUDE=-I../include
 CFLAGS=$(WFLAGS) $(INCLUDE)
 
 

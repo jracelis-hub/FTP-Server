@@ -2,12 +2,12 @@
 CC=gcc
 WFLAGS=-Wall -Werror
 DEBUG=-g
-INCLUDE=-I../../include
+INCLUDE=-I../include
 CFLAGS=$(WFLAGS) $(DEBUG) $(INCLUDE)
 
 BUILD_DIR=./build
 OBJ_DIR=./obj
-SRC:=main.c client.c logging.c client-commands.c command_utility.c
+SRC:=main.c client.c logging.c client-commands.c parsing.c
 OBJ:=$(patsubst %.c,$(OBJ_DIR)/%.o,$(SRC))
 CLIENT:=$(addprefix $(BUILD_DIR)/,client)
 
