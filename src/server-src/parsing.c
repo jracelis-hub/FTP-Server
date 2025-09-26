@@ -45,15 +45,82 @@ bool isanewline(int n)
 	return newline;
 }
 
-bool isdirectoryformat(char *directory)
+int parse_request_get_file(char *request, char *file, size_t file_size)
 {
-	bool dir = true;
+	char *p;
+	size_t file_len = strlen(file);
+	int i = 0;
+	for (p = request; *p != '\0' && *p != '\n'; p++) {
+		/* The following looks for a ; / or a ' ' if the following is met
+		 * the pointer to request will be set after it 
+		 * Example: Download; /path/file.txt\n
+		 * once Download; request is now pointing to _/path/file.txt
+		 * until is is left with file.txt                          */
+		if (isasemicolon(*p) || isaslash(*p) || isaspace(*p)) {
+			request = p;
+			request++;
+		}
+	}
 
-	size_t dir_len = strlen(directory);
+	/* Starting from the pointed location set from the for loop above 
+	 * each character is placed into the array that was passed into         
+	 * file[0] = f
+	 * file[1] = i
+	 * file[2] = l 
+	 * and so on until the newline is met */
+	if (file_len != 0 ) {
+		while (*request != '\0' && *request != '\n') {
+			if (i == file_size - 1) {
+				return ERROR_OVERFLOW;
+			}
+			file[i++] = *request++;
+		}
+		file[i] = '\0';
+		return SUCCESS;
+	}
 
-	if ( *(directory + dir_len - 1) == '/')
-		return dir;
-	
-	dir = false;
-	return dir;
+	while (*request != '\0' && *request != '\n') {
+		if (i  ) {
+
+		}
+	}
+	return SUCCESS;
+}
+
+char *parse_request_get_command(char *command)
+{
+	char *p;
+	for (p = command; *p != '\0'; p++)
+	{
+		/* Looks for the semi-colon once found 
+		 * increments past the semi-colon and
+		 * null teriminate the string and return it */
+		if (isasemicolon(*p)) {
+			*(p + 1) = '\0';
+			return command;
+		}
+		/* For the request does not return a proper format
+		 * the next item it looks for is a newline/linefeed
+		 * if found it returns the invalid request sent  */
+		else if (isanewline(*p)) {
+			*p = '\0';
+			return command;
+		}
+	}
+	return NULL;
+}
+
+char *parse_request_get_payload(char *payload)
+{
+	char *p;
+	for (p = payload; *p != '\n'; p++)
+	{
+		if (isanewline(*p)) {
+			payload = p;
+			*p = '\0';
+			payload++;
+			return payload;
+		}
+	}
+	return NULL;
 }

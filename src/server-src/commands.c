@@ -50,73 +50,6 @@ int command_handler(thread_handler_t *thread_handle)
 	return SUCCESS;
 }
 
-int command_get_file(char *request, char *file, size_t size)
-{
-	char *p;
-	int i = 0;
-	for (p = request; *p != '\0'; p++)
-	{
-		/* The following looks for a ; / or a ' ' if the following is met
-		 * the pointer to request will be set after it 
-		 * Example: Download; /path/file.txt\n
-		 * once Download; request is now pointing to _/path/file.txt
-		 * until is is left with file.txt                          */
-		if (isasemicolon(*p) || isaslash(*p) || isaspace(*p))
-		{
-			request = p;
-			request++;
-		/* Once going through the whole request and 
-		 * a newline is found it breaks          */
-		}
-		if (isanewline(*p))
-			break;
-	}
-
-	/* Starting from the pointed location set from the for loop above 
-	 * each character is placed into the array that was passed into         
-	 * file[0] = f
-	 * file[1] = i
-	 * file[2] = l 
-	 * and so on until the newline is met */
-	while (*request != '\0' && *request != '\n')
-	{
-		if (i == size - 1)
-			return ERROR_OVERFLOW;
-		file[i++] = *request++;
-	}
-	file[i] = '\0';
-	return SUCCESS;
-}
-
-char *command_get_request(char *command)
-{
-	char *p;
-	for (p = command; *p != '\0'; p++)
-	{
-		if (isasemicolon(*p))
-			*(p + 1) = '\0';
-		else if (isanewline(*p))
-			*p = '\0';
-	}
-	return command;
-}
-
-char *command_strip_header(char *payload)
-{
-	char *p;
-	for (p = payload; *p != '\n'; p++)
-	{
-		if (isanewline(*p))
-		{
-			payload = p;
-			*p = '\0';
-			payload++;
-			return payload;
-		}
-	}
-	return NULL;
-}
-
 int command_handle_upload(char *request, char *reply, size_t reply_size, char *directory)
 {
 	char file_path[256] = {0};
@@ -160,20 +93,22 @@ int command_handle_upload(char *request, char *reply, size_t reply_size, char *d
 
 int command_handle_read(thread_handler_t *thread_handle)
 {
-	/* Command strip path will take the request:
-	 * Read; file.txt and strip off the request 
+	/* Parse request to get the file:
+	 * Read; file.txt and strip off the command 
 	 * and place file.txt into the buffer file   */
-	command_get_file(thread_handle->request, file, sizeof(file));
+	parse_request_get_file(thread_handle->request, thread_handle->file, thread_handle->file_size);
 
 	int fd = open(file_path, O_RDONLY);
 	if (fd == -1) return ERROR_FILE;
 
-	ssize_t read_bytes = read(fd, reply, reply_size - 1);
-	if (read_bytes == -1) return ERROR_BYTES;
-	else if (read_bytes > 0) reply[read_bytes] = '\0';
+	thread_handle->read_bytes = read(fd, thread_handle->reply, thread_handle->reply_size);
+	if (read_bytes == -1) {
+		return ERROR_BYTES;
+	}
 
 	close(fd);
 
+	thread_handle->reply[thread_handle->read_bytes] = '\0';
 	return SUCCESS;
 }
 
@@ -200,7 +135,7 @@ int command_handle_list(thread_handler_t *thread_handle)
 			continue;
 
 		/* Addes to the overflow meter and comparies it to the
-		   reply_size (1024), if it passes it will stop and close */
+		   reply_size , if it passes it will stop and close */
 		overflow_meter += strlen(dir->d_name) + strlen("\n");
 		if (thread_handle->reply_size <= overflow_meter)
 		{
@@ -219,7 +154,7 @@ int command_handle_list(thread_handler_t *thread_handle)
 
 void command_handle_invalid(thread_handler_t *thread_handle)
 {
-	char *invalid_command = command_get_request(thread_handle->request);
+	char *invalid_command = parse_request_get_command(thread_handle->request);
 
 	snprintf(thread_handle->reply,thread_handle->reply_size,"Status: Bad\nRequest: %s\n",invalid_command);
 }
