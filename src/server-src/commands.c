@@ -33,8 +33,14 @@ int command_handler(thread_handler_t *thread_handle)
 {
 	switch (thread_handle->command) {
 		case DOWNLOAD:
+			if (command_handle_download(thread_handle) < 0 ) {
+				return ERROR_COMMAND;
+			}
 			break;
 		case UPLOAD:
+			if (command_handle_upload(thread_handle) < 0 ) {
+				return ERROR_COMMAND;
+			}
 			break;
 		case LIST:
 			if (command_handle_list(thread_handle) < 0) {
@@ -42,6 +48,9 @@ int command_handler(thread_handler_t *thread_handle)
 			}
 			break;
 		case READ:
+			if (command_handle_read(thread_handle) < 0) {
+				return ERROR_COMMAND;
+			}
 			break;
 		case INVALID:
 			command_handle_invalid(thread_handle);
@@ -50,65 +59,68 @@ int command_handler(thread_handler_t *thread_handle)
 	return SUCCESS;
 }
 
-int command_handle_upload(char *request, char *reply, size_t reply_size, char *directory)
+int command_handle_download(thread_handler_t *thread_handle)
 {
-	char file_path[256] = {0};
-	size_t file_path_len = sizeof(file_path);
-
-	char file[64] = {0};
-	size_t file_len = sizeof(file);
-
-	if (command_get_file(request, file, file_len) < 0)
-	{
-		error_msg("Command_upload = overflow");
+	if (strlen(thread_handle->directory) >= FILE_PATH_SIZE) {
+		error_msg("File buffer is too small to hold directory path");
 		return ERROR_OVERFLOW;
 	}
+	strcpy(thread_handle->file, thread_handle->directory);
+	if (parse_request_get_file(thread_handle->request, 
+	    thread_handle->file, FILE_PATH_SIZE) != 0) {
+		error_msg("Could not get file from request");
+		return ERROR_FILE;
+	}
 
-	printf("File = %s",file);
-
-	if (!isdirectoryformat(file_path))
-		snprintf(file_path, file_path_len, "%s/%s", directory, file);
-	else
-		snprintf(file_path, file_path_len, "%s%s", directory, file);
-
-	printf("File path = %s",file_path);
-
-	int fd = open(file_path, O_WRONLY, S_IRWXU);
-	if (fd == -1) 
-	{
+	int fd = open(thread_handle->file, O_RDONLY);
+	if (fd < 0) {
 		error_msg("Could not open file");
 		return ERROR_FILE;
 	}
 
-	char *payload = command_strip_header(request);
-
-	ssize_t write_bytes = write(fd, payload, strlen(payload));
-	if (write_bytes == -1) return ERROR_BYTES;
-	else if (write_bytes > 0) reply[write_bytes] = '\0';
-
+	ssize_t read_bytes = read(fd, thread_handle->reply, 
+	                          thread_handle->reply_size);
+	if (thread_handle->reply_size == read_bytes) {
+		error_msg("Reading bytes in buffer overflow");
+		close(fd);
+		return ERROR_OVERFLOW;
+	}
+	
 	close(fd);
 
 	return SUCCESS;
 }
 
-int command_handle_read(thread_handler_t *thread_handle)
+int command_handle_upload(thread_handler_t *thread_handle) 
 {
-	/* Parse request to get the file:
-	 * Read; file.txt and strip off the command 
-	 * and place file.txt into the buffer file   */
-	parse_request_get_file(thread_handle->request, thread_handle->file, thread_handle->file_size);
+	if (strlen(thread_handle->directory) >= FILE_PATH_SIZE) {
+		error_msg("File buffer is too small to hold directory path");
+		return ERROR_OVERFLOW;
+	}
+	strcpy(thread_handle->file, thread_handle->directory);
+	if (parse_request_get_file(thread_handle->request, 
+	    thread_handle->file, FILE_PATH_SIZE) != 0) {
+		error_msg("Could not get file from request");
+		return ERROR_FILE;
+	}
 
-	int fd = open(file_path, O_RDONLY);
-	if (fd == -1) return ERROR_FILE;
+	/* Creating file with the mode of write and read permission */
+	int fd = open(thread_handle->file, O_CREAT | S_IRUSR);
+	if (fd < 0) {
+		error_msg("Could not create the file on server");	
+		return ERROR_FILE;
+	}
 
-	thread_handle->read_bytes = read(fd, thread_handle->reply, thread_handle->reply_size);
-	if (read_bytes == -1) {
+	ssize_t write_bytes = write(fd, thread_handle->request, 
+	                            strlen(thread_handle->request));
+	
+	if (write_bytes < 0) {
+		error_msg("Error writing bytes into new file");
+		close(fd);
 		return ERROR_BYTES;
 	}
 
 	close(fd);
-
-	thread_handle->reply[thread_handle->read_bytes] = '\0';
 	return SUCCESS;
 }
 
@@ -134,7 +146,7 @@ int command_handle_list(thread_handler_t *thread_handle)
 		    !strcmp(dir->d_name, ".."))
 			continue;
 
-		/* Addes to the overflow meter and comparies it to the
+		/* Adds to the overflow meter and comparies it to the
 		   reply_size , if it passes it will stop and close */
 		overflow_meter += strlen(dir->d_name) + strlen("\n");
 		if (thread_handle->reply_size <= overflow_meter)
@@ -148,6 +160,41 @@ int command_handle_list(thread_handler_t *thread_handle)
 	}
 
 	closedir(dir_fd);
+
+	return SUCCESS;
+}
+
+int command_handle_read(thread_handler_t *thread_handle)
+{
+	printf("%s\n", thread_handle->directory);
+	if (strlen(thread_handle->directory) >= FILE_PATH_SIZE) {
+		error_msg("File buffer is too small to hold directory path");
+		return ERROR_OVERFLOW;
+	}
+	strcpy(thread_handle->file, thread_handle->directory);
+	if (parse_request_get_file(thread_handle->request, 
+	    thread_handle->file, FILE_PATH_SIZE) != 0) {
+		error_msg("Could not get file from request");
+		return ERROR_FILE;
+	}
+
+	printf("%s\n", thread_handle->file);
+
+	int fd = open(thread_handle->file, O_RDONLY);
+	if (fd < 0) {
+		error_msg("Could not open file");
+		return ERROR_FILE;
+	}
+
+	ssize_t read_bytes = read(fd, thread_handle->reply, 
+	                          thread_handle->reply_size);
+	if (thread_handle->reply_size == read_bytes) {
+		error_msg("Reading bytes in buffer overflow");
+		close(fd);
+		return ERROR_OVERFLOW;
+	}
+	
+	close(fd);
 
 	return SUCCESS;
 }

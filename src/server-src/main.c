@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 			continue;
 		}
 		
-		if (server_create_thread(client_fd, directory, &client_address, thread_handle_client) < 0)
+		if (server_create_thread(client_fd, directory, &client_address, &thread_handle_client) < 0)
 		{
 			error_msg("Could not create thread");
 			close(client_fd);
