@@ -14,6 +14,18 @@
 #include "logging.h"
 #include "thread.h"
 
+/* Sets socket option to reuse the same port and address for testing */
+int server_set_socket_options(int *listen_fd) 
+{
+	int is_ip_port_reuse = 1;
+	socklen_t optlen = sizeof(is_ip_port_reuse);
+	if (setsockopt(*listen_fd, SOL_SOCKET, SO_REUSEADDR, 
+	               &is_ip_port_reuse, optlen) < 0) {
+		error_msg("Could not set socket option");
+		return ERROR_SOCKET_OPT;
+	}
+	return SUCCESS;
+}
 /* To create a ipv4 server */
 int server_set_ip4(struct sockaddr_in *server_ip4, int port, char *ip4_address)
 {

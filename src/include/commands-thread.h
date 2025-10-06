@@ -1,9 +1,7 @@
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef COMMANDS_THREAD_H
+#define COMMANDS_THREAD_H
 
 #include <stddef.h>
-
-#define BUFFER 1024
 
 typedef struct thread_handler_t thread_handler_t;
 
@@ -17,4 +15,4 @@ int command_handle_read(thread_handler_t *thread_handle);
 
 void command_handle_invalid(thread_handler_t *thread_handle);
 
-#endif /* COMMANDS_H */
+#endif /* COMMANDS_THREAD_H */

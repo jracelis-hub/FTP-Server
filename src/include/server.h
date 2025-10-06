@@ -6,7 +6,7 @@
 #include <stddef.h> /* size_t */
 
 #define MAX_WAITING_CONNECTIONS 5
-#define DIRECTORY_SIZE 64
+#define DIRECTORY_SIZE 256
 
 /* server_thread_t is used to be passed into void *args 
  * of thread_handle_client found in thread.h         */
@@ -18,6 +18,9 @@ typedef struct server_thread_t {
 
 /* Transfers argv[3] mounted directory to the stack directory */
 int server_set_directory(char *directory, size_t directory_size, char *dir_arg);
+
+/* Sets socket option */
+int server_set_socket_options(int *listen_fd);
 
 /* IPv4 Setup */
 int server_create_stream_socket_ip4(int *listen_fd);

@@ -48,8 +48,8 @@ bool isanewline(int n)
 
 int parse_request_get_file(char *request, char *file, size_t file_size)
 {
+	int i = 0;
 	char *p;
-	size_t file_len = strlen(file);
 	for (p = request; *p != '\0' && *p != '\n'; p++) {
 		/* The following looks for a ; / or a ' ' if the following is met
 		 * the pointer to request will be set after it 
@@ -68,16 +68,12 @@ int parse_request_get_file(char *request, char *file, size_t file_size)
 	 * file[1] = i
 	 * file[2] = l 
 	 * and so on until the newline is met */
-	if (file_len != 0 ) {
-		while (*request != '\0' && *request != '\n') {
-			if (file_len == file_size - 1) {
-				return ERROR_OVERFLOW;
-			}
-			file[file_len++] = *request++;
-		}
-		file[file_len] = '\0';
-		return SUCCESS;
+	while (*request != '\0' && *request != '\n' && i < file_size) {
+		file[i++] = *request++;
 	}
+	file[i] = '\0';
+
+	if (i < file_size) { return ERROR_OVERFLOW; }
 
 	return SUCCESS;
 }

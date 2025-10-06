@@ -1,15 +1,18 @@
 #include <stdio.h>
 #include "logging.h"
 
-void format(int count,const char character) {
-
-	for (int i=0 ; i<count ; i++) {
+void format(int count,const char character) 
+{
+	int i;
+	for (i = 0; i < count; i++) 
+	{
 		putc(character,stdout);
 	}
 	putc('\n',stdout);
 }
 
-void usage(char *program) {
+void usage(char *program) 
+{
 	format(40,'-');
 	printf("  Usage: %s [IPv4] [Port].\n",program);
 	printf("Example: %s 192.168.0.xxx 8000.\n",program);
@@ -17,15 +20,24 @@ void usage(char *program) {
 	format(40,'-');
 }
 
-void error_msg(const char *message) {
-	fprintf(stderr,"%s\n",message);
+void perform_msg(const char *message)
+{
+	printf("%s\n", message);
+}
+
+void error_msg(const char *message) 
+{
+	fprintf(stderr, "%s\n",message);
 }
 
 void pass_msg(void) {
 	int count = 35;	
-	for (int i=0; i < count; i++) {
+	int i;
+	for (i = 0; i < count; i++) 
+	{
 		putchar('-');
-		if ( i == count-1 ) {
+		if ( i == count-1 ) 
+		{
 			putchar('>');
 			puts(" Done");
 		}

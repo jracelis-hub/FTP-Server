@@ -1,4 +1,4 @@
-#include "commands.h" 
+#include "commands-thread.h" 
 #include "parsing.h"
 #include "logging.h"
 #include "thread.h"
@@ -12,43 +12,53 @@
 
 void command_receive_from_client(thread_handler_t *thread_handle)
 {
-	if (!strncmp(thread_handle->request, "Download;", strlen("Download;"))) {
+	if (!strncmp(thread_handle->request, "Download;", strlen("Download;"))) 
+	{
 		thread_handle->command = DOWNLOAD;
 	}
-	else if (!strncmp(thread_handle->request, "Upload;", strlen("Upload;"))) {
+	else if (!strncmp(thread_handle->request, "Upload;", strlen("Upload;"))) 
+	{
 		thread_handle->command = UPLOAD;
 	}
-	else if (!strncmp(thread_handle->request, "List;", strlen("List;"))) {
+	else if (!strncmp(thread_handle->request, "List;", strlen("List;"))) 
+	{
 		thread_handle->command = LIST;
 	}
-	else if (!strncmp(thread_handle->request, "Read;", strlen("Read;"))) {
+	else if (!strncmp(thread_handle->request, "Read;", strlen("Read;"))) 
+	{
 		thread_handle->command = READ;
 	}
-	else {
+	else 
+	{
 		thread_handle->command = INVALID;
 	}
 }
 
 int command_handler(thread_handler_t *thread_handle)
 {
-	switch (thread_handle->command) {
+	switch (thread_handle->command) 
+	{
 		case DOWNLOAD:
-			if (command_handle_download(thread_handle) < 0 ) {
+			if (command_handle_download(thread_handle) < 0 ) 
+			{
 				return ERROR_COMMAND;
 			}
 			break;
 		case UPLOAD:
-			if (command_handle_upload(thread_handle) < 0 ) {
+			if (command_handle_upload(thread_handle) < 0 ) 
+			{
 				return ERROR_COMMAND;
 			}
 			break;
 		case LIST:
-			if (command_handle_list(thread_handle) < 0) {
+			if (command_handle_list(thread_handle) < 0) 
+			{
 				return ERROR_COMMAND;
 			}
 			break;
 		case READ:
-			if (command_handle_read(thread_handle) < 0) {
+			if (command_handle_read(thread_handle) < 0) 
+			{
 				return ERROR_COMMAND;
 			}
 			break;
@@ -61,26 +71,34 @@ int command_handler(thread_handler_t *thread_handle)
 
 int command_handle_download(thread_handler_t *thread_handle)
 {
-	if (strlen(thread_handle->directory) >= FILE_PATH_SIZE) {
-		error_msg("File buffer is too small to hold directory path");
+	if (parse_request_get_file(thread_handle->request, thread_handle->file, 
+	                           thread_handle->file_size) < 0) 
+	{
+		error_msg("File length to long for file buffer");
 		return ERROR_OVERFLOW;
 	}
-	strcpy(thread_handle->file, thread_handle->directory);
-	if (parse_request_get_file(thread_handle->request, 
-	    thread_handle->file, FILE_PATH_SIZE) != 0) {
-		error_msg("Could not get file from request");
-		return ERROR_FILE;
+	
+	if (strlen(thread_handle->directory) + strlen(thread_handle->file) + 1 
+	    < thread_handle->directory_size) 
+	{
+		error_msg("Directory buffer full");
+		return ERROR_OVERFLOW;
 	}
 
-	int fd = open(thread_handle->file, O_RDONLY);
-	if (fd < 0) {
+	/* /home/directory/ + file.txt */
+	strcat(thread_handle->directory, thread_handle->file);
+	
+	int fd = open(thread_handle->directory, O_RDONLY);
+	if (fd < 0) 
+	{
 		error_msg("Could not open file");
 		return ERROR_FILE;
 	}
 
 	ssize_t read_bytes = read(fd, thread_handle->reply, 
 	                          thread_handle->reply_size);
-	if (thread_handle->reply_size == read_bytes) {
+	if (thread_handle->reply_size == read_bytes) 
+	{
 		error_msg("Reading bytes in buffer overflow");
 		close(fd);
 		return ERROR_OVERFLOW;
@@ -93,20 +111,24 @@ int command_handle_download(thread_handler_t *thread_handle)
 
 int command_handle_upload(thread_handler_t *thread_handle) 
 {
-	if (strlen(thread_handle->directory) >= FILE_PATH_SIZE) {
-		error_msg("File buffer is too small to hold directory path");
+	if (parse_request_get_file(thread_handle->request, thread_handle->file, 
+	                           thread_handle->file_size) < 0) 
+	{
+		error_msg("File length to long for file buffer");
 		return ERROR_OVERFLOW;
 	}
-	strcpy(thread_handle->file, thread_handle->directory);
-	if (parse_request_get_file(thread_handle->request, 
-	    thread_handle->file, FILE_PATH_SIZE) != 0) {
-		error_msg("Could not get file from request");
-		return ERROR_FILE;
+	
+	if (strlen(thread_handle->directory) + strlen(thread_handle->file) + 1 
+	    < thread_handle->directory_size) 
+	{
+		error_msg("Directory buffer full");
+		return ERROR_OVERFLOW;
 	}
 
 	/* Creating file with the mode of write and read permission */
 	int fd = open(thread_handle->file, O_CREAT | S_IRUSR);
-	if (fd < 0) {
+	if (fd < 0) 
+	{
 		error_msg("Could not create the file on server");	
 		return ERROR_FILE;
 	}
@@ -114,7 +136,8 @@ int command_handle_upload(thread_handler_t *thread_handle)
 	ssize_t write_bytes = write(fd, thread_handle->request, 
 	                            strlen(thread_handle->request));
 	
-	if (write_bytes < 0) {
+	if (write_bytes < 0) 
+	{
 		error_msg("Error writing bytes into new file");
 		close(fd);
 		return ERROR_BYTES;
@@ -166,29 +189,31 @@ int command_handle_list(thread_handler_t *thread_handle)
 
 int command_handle_read(thread_handler_t *thread_handle)
 {
-	printf("%s\n", thread_handle->directory);
-	if (strlen(thread_handle->directory) >= FILE_PATH_SIZE) {
-		error_msg("File buffer is too small to hold directory path");
+	if (parse_request_get_file(thread_handle->request, thread_handle->file, 
+	                           thread_handle->file_size) < 0) 
+	{
+		error_msg("File length to long for file buffer");
 		return ERROR_OVERFLOW;
 	}
-	strcpy(thread_handle->file, thread_handle->directory);
-	if (parse_request_get_file(thread_handle->request, 
-	    thread_handle->file, FILE_PATH_SIZE) != 0) {
-		error_msg("Could not get file from request");
-		return ERROR_FILE;
+	
+	if (strlen(thread_handle->directory) + strlen(thread_handle->file) + 1 
+	    < thread_handle->directory_size) 
+	{
+		error_msg("Directory buffer full");
+		return ERROR_OVERFLOW;
 	}
 
-	printf("%s\n", thread_handle->file);
-
 	int fd = open(thread_handle->file, O_RDONLY);
-	if (fd < 0) {
+	if (fd < 0) 
+	{
 		error_msg("Could not open file");
 		return ERROR_FILE;
 	}
 
 	ssize_t read_bytes = read(fd, thread_handle->reply, 
 	                          thread_handle->reply_size);
-	if (thread_handle->reply_size == read_bytes) {
+	if (thread_handle->reply_size == read_bytes) 
+	{
 		error_msg("Reading bytes in buffer overflow");
 		close(fd);
 		return ERROR_OVERFLOW;

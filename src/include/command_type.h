@@ -6,7 +6,8 @@ typedef enum command_t {
 	UPLOAD,
 	LIST,
 	READ,
-	INVALID = -1
+	INVALID = -1,
+	EMPTY
 } command_t;
 
 #endif /* COMMAND_TYPE_H */

@@ -14,6 +14,7 @@
 #define ERROR_COMMAND (-9)
 #define ERROR_BYTES (-10)
 #define ERROR_SERVER (-20)
+#define ERROR_SOCKET_OPT (-30)
 
 /* prints usage message from invalid arguments passed in */
 void usage(char *program);
