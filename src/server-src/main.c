@@ -12,8 +12,8 @@
 #include "logging.h"
 #include "thread.h"
 
-int main(int argc, char *argv[]) {
-
+int main(int argc, char *argv[]) 
+{
 	/* Requres 3 arguments */
 	if ( argc != 4 ) 
 	{
@@ -113,12 +113,13 @@ int main(int argc, char *argv[]) {
 	{
 		perform_msg("Ready to accept connections...");
 
-		int client_fd = 0;
+		int client_fd;
 		struct sockaddr_storage client_address = {0};
 		server_accept_client(listen_fd, &client_fd, &client_address);
 		if (client_fd < 0) 
 		{
 			error_msg("Could not accept connection");
+			sleep(.5);
 			continue;
 		}
 		
@@ -126,8 +127,11 @@ int main(int argc, char *argv[]) {
 		{
 			error_msg("Could not create thread");
 			close(client_fd);
+			sleep(.5);
 			continue;
 		}
+
+		sleep(.5);
 	}
 
 	close(listen_fd);

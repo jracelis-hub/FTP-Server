@@ -20,7 +20,8 @@ int server_set_socket_options(int *listen_fd)
 	int is_ip_port_reuse = 1;
 	socklen_t optlen = sizeof(is_ip_port_reuse);
 	if (setsockopt(*listen_fd, SOL_SOCKET, SO_REUSEADDR, 
-	               &is_ip_port_reuse, optlen) < 0) {
+	               &is_ip_port_reuse, optlen) < 0) 
+	{
 		error_msg("Could not set socket option");
 		return ERROR_SOCKET_OPT;
 	}
@@ -33,7 +34,9 @@ int server_set_ip4(struct sockaddr_in *server_ip4, int port, char *ip4_address)
 	server_ip4->sin_port = htons(port);
 	if (inet_pton(server_ip4->sin_family, ip4_address, 
 	              &server_ip4->sin_addr) != 1)
+	{
 		return ERROR_SERVER;
+	}
 	return SUCCESS;
 }
 
@@ -41,12 +44,14 @@ int server_create_stream_socket_ip4(int *listen_fd)
 {
 	const char *proto_name = "tcp";
 	struct protoent *proto = getprotobyname(proto_name);
-	if (!proto) {
+	if (!proto) 
+	{
 		return ERROR_SERVER;
 	}
 
 	*listen_fd = socket(AF_INET, SOCK_STREAM, proto->p_proto);
-	if (*listen_fd < 0) {
+	if (*listen_fd < 0) 
+	{
 		return ERROR_SERVER;
 	}
 
@@ -57,7 +62,8 @@ int server_bind_socket_ip4(int listen_fd, struct sockaddr_in *server_ip4)
 {
 	socklen_t addrlen = sizeof(*server_ip4);
 
-	if (bind(listen_fd, (struct sockaddr *)server_ip4, addrlen) != 0) {
+	if (bind(listen_fd, (struct sockaddr *)server_ip4, addrlen) != 0) 
+	{
 		return ERROR_SERVER;
 	}
 
@@ -70,7 +76,8 @@ int server_set_ip6(struct sockaddr_in6 *server_ip6, int port, char *ip6_address)
 	server_ip6->sin6_family = AF_INET6;
 	server_ip6->sin6_port = htons(port);
 	if (inet_pton(server_ip6->sin6_family, ip6_address, 
-	              &server_ip6->sin6_addr) != 1) {
+	              &server_ip6->sin6_addr) != 1) 
+	{
 		return ERROR_SERVER;
 	}
 
@@ -81,12 +88,14 @@ int server_create_stream_socket_ip6(int *listen_fd)
 {
 	const char *proto_name = "tcp";
 	struct protoent *proto = getprotobyname(proto_name);
-	if (!proto) {
+	if (!proto)
+	{
 		return ERROR_SERVER;
 	}
 
 	*listen_fd = socket(AF_INET6, SOCK_STREAM, proto->p_proto);
-	if (*listen_fd < 0) {
+	if (*listen_fd < 0)
+	{
 		return ERROR_SERVER;
 	}
 
@@ -97,7 +106,8 @@ int server_bind_socket_ip6(int listen_fd, struct sockaddr_in6 *server_ip6)
 {
 	socklen_t addrlen = sizeof(*server_ip6);
 
-	if (bind(listen_fd, (struct sockaddr *)server_ip6, addrlen) != 0) {
+	if (bind(listen_fd, (struct sockaddr *)server_ip6, addrlen) != 0)
+	{
 		return ERROR_SERVER;
 	}
 
@@ -107,7 +117,8 @@ int server_bind_socket_ip6(int listen_fd, struct sockaddr_in6 *server_ip6)
 /* Use socket created to begin listening */
 int server_listen_on_socket(int listen_fd)
 {
-	if (listen(listen_fd, MAX_WAITING_CONNECTIONS) != 0) {
+	if (listen(listen_fd, MAX_WAITING_CONNECTIONS) != 0) 
+	{
 		return ERROR_SERVER;
 	}
 
@@ -116,12 +127,13 @@ int server_listen_on_socket(int listen_fd)
 
 int server_accept_client(int listen_fd, int *client_fd, struct sockaddr_storage *client)
 {
-		socklen_t addrlen = sizeof(*client);
+	socklen_t addrlen = sizeof(*client);
 
-		*client_fd = accept(listen_fd, (struct sockaddr *)client, &addrlen);
-		if (*client_fd < 0) {
-			return ERROR_SERVER;
-		}
+	*client_fd = accept(listen_fd, (struct sockaddr *)client, &addrlen);
+	if (*client_fd < 0) 
+	{
+		return ERROR_SERVER;
+	}
 	return SUCCESS;
 }
 
@@ -129,11 +141,14 @@ int server_set_directory(char *directory, size_t directory_size, char *directory
 {
 	/* Checks if the directory ends with a / if not it will append it to the end */
 	size_t dir_arg_len = strlen(directory_arg);
-	if (directory_arg[dir_arg_len - 1] != '/' && dir_arg_len < directory_size - 1) {
+	if (directory_arg[dir_arg_len - 1] != '/' && dir_arg_len < directory_size - 1)
+	{
 		strcpy(directory, directory_arg);	
 		strcat(directory, "/");
 		return SUCCESS;
-	} else if (directory_arg[dir_arg_len - 1] == '/') {
+	} 
+	else if (directory_arg[dir_arg_len - 1] == '/') 
+	{
 		strcpy(directory, directory_arg);
 		return SUCCESS;
 	}
@@ -145,7 +160,8 @@ int server_create_thread(int client_fd, char *directory, struct sockaddr_storage
 	/* Allocates space for server_pthreads_t on the heap to pass the 
 	 * the arguments utilized in thread_handle_client             */
 	server_thread_t *server_thread = calloc(1, sizeof(*server_thread));
-	if (server_thread == NULL) {
+	if (server_thread == NULL) 
+	{
 		error_msg("Could not allocate space");
 		return ERROR_ALLOC;
 	}
@@ -160,7 +176,8 @@ int server_create_thread(int client_fd, char *directory, struct sockaddr_storage
 
 	/* Create pthread attr to set for pthread_create */
 	pthread_attr_t attr;
-	if (pthread_attr_init(&attr) != 0) {
+	if (pthread_attr_init(&attr) != 0) 
+	{
 		error_msg("Could not create pthread attribute");
 		free(server_thread);
 		return ERROR_THREADS;
@@ -170,7 +187,8 @@ int server_create_thread(int client_fd, char *directory, struct sockaddr_storage
 	 * the detach state allows each thread to handle its own 
 	 * communicate with the client and * free its resources when done                   
 	 */
-	if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) != 0) {
+	if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) != 0) 
+	{
 		error_msg("Could not set pthread attr to detached state");
 		pthread_attr_destroy(&attr);
 		free(server_thread);
@@ -179,7 +197,8 @@ int server_create_thread(int client_fd, char *directory, struct sockaddr_storage
 
 	/* Create a pthread */
 	pthread_t thread_client;
-	if (pthread_create(&thread_client, &attr, thread_handle_client, (void *)server_thread) != 0) {
+	if (pthread_create(&thread_client, &attr, thread_handle_client, (void *)server_thread) != 0) 
+	{
 		error_msg("Could not create thread");
 		pthread_attr_destroy(&attr);
 		free(server_thread);

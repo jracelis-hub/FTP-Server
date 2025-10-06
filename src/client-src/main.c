@@ -12,7 +12,7 @@
 int main(int argc, char *argv[]) {
 	
 	/* Requrires ./program IP Port arguments */
-	if ( argc != 3 ) 
+	if (argc != 3) 
 	{
 		usage(argv[0]);
 		return -1;
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 
 	int port = atoi(argv[2]);
 
-	if ( port < 1024 || port > 65535) 
+	if (port < 1024 || port > 65535) 
 	{
 		error_msg("Port has to be above 1023 or below 65535");
 		usage(argv[0]);
