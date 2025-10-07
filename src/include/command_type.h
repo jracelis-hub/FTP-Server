@@ -7,7 +7,7 @@ typedef enum command_t {
 	LIST,
 	READ,
 	INVALID = -1,
-	EMPTY
+	EMPTY = 10
 } command_t;
 
 #endif /* COMMAND_TYPE_H */

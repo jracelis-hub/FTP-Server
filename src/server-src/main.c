@@ -30,14 +30,14 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	/* Holds the mounted directory passed in argv[3] */
+	/* Holds the mounted directory passed in argv[3] 
+	 * and appends / if argv[3] does not include it */
 	char directory[DIRECTORY_SIZE] = {0};
 	if (server_set_directory(directory, DIRECTORY_SIZE, argv[3]) < 0) 
 	{
 		error_msg("Over flow on directory buffer");
 		return -1;
 	}
-	printf("%s\n", directory);
 
 /* Setting up socket structure to hold IPv4 or IPv6
  * and port                                      */

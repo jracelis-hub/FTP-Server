@@ -65,6 +65,9 @@ int command_handler(thread_handler_t *thread_handle)
 		case INVALID:
 			command_handle_invalid(thread_handle);
 			break;
+		default:
+			error_msg("Error invalid command type\n");
+			return ERROR_COMMAND;
 	}
 	return SUCCESS;
 }
@@ -78,8 +81,8 @@ int command_handle_download(thread_handler_t *thread_handle)
 		return ERROR_OVERFLOW;
 	}
 	
-	if (strlen(thread_handle->directory) + strlen(thread_handle->file) + 1 
-	    < thread_handle->directory_size) 
+	if (strlen(thread_handle->directory) + strlen(thread_handle->file) + 1
+	    > thread_handle->directory_size) 
 	{
 		error_msg("Directory buffer full");
 		return ERROR_OVERFLOW;
@@ -109,33 +112,49 @@ int command_handle_download(thread_handler_t *thread_handle)
 	return SUCCESS;
 }
 
+/* Done */
 int command_handle_upload(thread_handler_t *thread_handle) 
 {
+	/* Get the file from request */
 	if (parse_request_get_file(thread_handle->request, thread_handle->file, 
 	                           thread_handle->file_size) < 0) 
 	{
 		error_msg("File length to long for file buffer");
 		return ERROR_OVERFLOW;
 	}
+	printf("%s\n", thread_handle->file);
 	
+	/* Checks if length of directory and file + '\0' is greater than directory size */
 	if (strlen(thread_handle->directory) + strlen(thread_handle->file) + 1 
-	    < thread_handle->directory_size) 
+	    > thread_handle->directory_size) 
 	{
 		error_msg("Directory buffer full");
 		return ERROR_OVERFLOW;
 	}
 
+	/* Copies /directory/file.txt 
+	 * Note: directory is already appended with a / see 
+	 * server_set_directory                         */
+	strcat(thread_handle->directory, thread_handle->file);
+
 	/* Creating file with the mode of write and read permission */
-	int fd = open(thread_handle->file, O_CREAT | S_IRUSR);
+	int fd = open(thread_handle->directory, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
 	if (fd < 0) 
 	{
 		error_msg("Could not create the file on server");	
 		return ERROR_FILE;
 	}
 
-	ssize_t write_bytes = write(fd, thread_handle->request, 
-	                            strlen(thread_handle->request));
-	
+	/* Return a pointer after the request, capturing the payload */
+	char *payload = parse_request_get_payload(thread_handle->request);
+	if (!payload) 
+	{
+		error_msg("Unable to parse request and get payload");
+		return ERROR_FILE;
+	}
+
+	/* Write the payload buffer into the new file on server */
+	ssize_t write_bytes = write(fd, payload, strlen(payload));
 	if (write_bytes < 0) 
 	{
 		error_msg("Error writing bytes into new file");
@@ -147,6 +166,7 @@ int command_handle_upload(thread_handler_t *thread_handle)
 	return SUCCESS;
 }
 
+/* Done */
 int command_handle_list(thread_handler_t *thread_handle)
 {
 	/* Opens the directory pointed by argv[3] if it is 
@@ -158,8 +178,8 @@ int command_handle_list(thread_handler_t *thread_handle)
 		return ERROR_DIR;
 	}
 
-	/* Overflow keeps a track of amount of bytes that are being
-	 * added into when cating data into buffer               */
+	/* Overflow keeps a track of bytes that are being
+	 * added into buffer after cating              */
 	size_t overflow_meter = 0;
 
 	struct dirent *dir;
@@ -187,8 +207,10 @@ int command_handle_list(thread_handler_t *thread_handle)
 	return SUCCESS;
 }
 
+/* Done */
 int command_handle_read(thread_handler_t *thread_handle)
 {
+	/* Get the file from request */
 	if (parse_request_get_file(thread_handle->request, thread_handle->file, 
 	                           thread_handle->file_size) < 0) 
 	{
@@ -196,14 +218,20 @@ int command_handle_read(thread_handler_t *thread_handle)
 		return ERROR_OVERFLOW;
 	}
 	
+	/* Checks if length of directory and file + '\0' is greater than directory size */
 	if (strlen(thread_handle->directory) + strlen(thread_handle->file) + 1 
-	    < thread_handle->directory_size) 
+	    > thread_handle->directory_size) 
 	{
 		error_msg("Directory buffer full");
 		return ERROR_OVERFLOW;
 	}
 
-	int fd = open(thread_handle->file, O_RDONLY);
+	/* Copies /directory/file.txt 
+	 * Note: directory is already appended with a / see 
+	 * server_set_directory                         */
+	strcat(thread_handle->directory, thread_handle->file);
+
+	int fd = open(thread_handle->directory, O_RDONLY);
 	if (fd < 0) 
 	{
 		error_msg("Could not open file");
@@ -228,5 +256,5 @@ void command_handle_invalid(thread_handler_t *thread_handle)
 {
 	char *invalid_command = parse_request_get_command(thread_handle->request);
 
-	snprintf(thread_handle->reply,thread_handle->reply_size,"Status: Bad\nRequest: %s\n",invalid_command);
+	snprintf(thread_handle->reply,thread_handle->reply_size,"Status: Bad\nRequest: %s\n", invalid_command);
 }

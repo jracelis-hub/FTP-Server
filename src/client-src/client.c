@@ -5,6 +5,8 @@
 
 #include "client.h"
 #include "logging.h"
+#include "parsing.h"
+#include "commands-client.h"
 
 /* To create TCP IPv4 socket */
 int client_create_stream_socket_ip4(int *socket_fd)
@@ -125,7 +127,7 @@ void client_set_buffers_zero(client_handler_t *client_handle)
 
 void client_received_bytes_from_server(client_handler_t *client_handle)
 {
-	command_handler(client_handle)
+	command_handler(client_handle);
 }
 
 void client_send_request_to_server(client_handler_t *client_handle)
@@ -135,7 +137,7 @@ void client_send_request_to_server(client_handler_t *client_handle)
 	fgets(client_handle->reply, client_handle->reply_size, stdin);
 
 	input_len = strlen(client_handle->reply);
-	reply[input_len] = '\0';
+	client_handle->reply[input_len] = '\0';
 }
 
 void client_send_bytes_to_server(client_handler_t *client_handle)
@@ -152,4 +154,37 @@ void client_send_bytes_to_server(client_handler_t *client_handle)
 	}
 
 	printf("Send %zu bytes\n", client_handle->send_bytes);
+}
+
+void client_cache_request(client_handler_t *client_handle) 
+{
+	if (!strncmp(client_handle->reply, "Download;", strlen("Download;")))
+	{
+		if (parse_request_get_file_path(client_handle->reply, 
+		                               client_handle->file,
+									   client_handle->file_size) < 0) 
+		{
+			error_msg("Error overflow");
+			return;
+		}
+		printf("%s\n",client_handle->file);
+		client_handle->command = DOWNLOAD;
+	}
+	else if (!strncmp(client_handle->reply, "Upload;", strlen("Upload;")))
+	{
+		command_handle_upload(client_handle);
+		client_handle->command = UPLOAD;
+	}
+	else if (!strncmp(client_handle->reply, "List;", strlen("List;")))
+	{
+		client_handle->command = LIST;
+	}
+	else if (!strncmp(client_handle->reply, "Read;", strlen("Read;")))
+	{
+		client_handle->command = READ;
+	}
+	else
+	{
+		client_handle->command = INVALID;
+	}
 }

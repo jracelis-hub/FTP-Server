@@ -40,6 +40,8 @@ void client_create_client_handler(client_handler_t *client_handle, int socket_fd
 
 void client_set_buffers_zero(client_handler_t *client_handle);
 
+void client_cache_request(client_handler_t *client_handle);
+
 void client_send_request_to_server(client_handler_t *client_handle);
 void client_received_bytes_from_server(client_handler_t *client_handle);
 void client_send_bytes_to_server(client_handler_t *client_handle);

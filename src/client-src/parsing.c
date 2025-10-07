@@ -79,7 +79,8 @@ int parse_request_get_file(char *request, char *file, size_t file_size)
 		 * Example: Download; /path/file.txt\n
 		 * once Download; request is now pointing to _/path/file.txt
 		 * until is is left with file.txt                          */
-		if (isasemicolon(*p) || isaslash(*p) || isaspace(*p)) {
+		if (isasemicolon(*p) || isaslash(*p) || isaspace(*p)) 
+		{
 			request = p;
 			request++;
 		}
@@ -107,25 +108,33 @@ int parse_request_get_file(char *request, char *file, size_t file_size)
 
 int parse_request_get_file_path(char *reply, char *file, size_t file_size)
 {
+	int i = 0;
 	char *p;
 	for (p = reply; *p != '\0' && *p != '\n'; p++)
 	{
-		if (!strncmp(reply, "..", 2) || isaslash(*p) 
-		    || isaperiod(*p) isalpha(*p))
+		if (isasemicolon(*p))
 		{
 			reply = p;
-			break;
+			reply++;
+			for (p = reply; *p != '\0' && *p != '\n'; p++)
+			{
+				if (isalpha(*p) || isaslash(*p) || isaperiod(*p))
+				{
+					reply = p;
+					break;
+				}
+			}
 		}
 	}
 
-	int i = 0;
-	while (reply != '\0' && reply '\n' && i < file_size)
+	while (*reply != '\0' && *reply != '\n' && i != file_size - 1)
 	{
 		file[i++] = *reply++;
 	}
-	file[i] = '\0';
 
-	if (i < file_size) { return ERROR_OVERFLOW; }
+	if (i == file_size - 1) { return ERROR_OVERFLOW; }
+
+	file[i] = '\0';
 
 	return SUCCESS;
 }

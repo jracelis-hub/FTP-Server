@@ -7,13 +7,12 @@ CFLAGS=$(WFLAGS) $(DEBUG) $(INCLUDE)
 
 BUILD_DIR=./build
 OBJ_DIR=./obj
-SRC:=main.c client.c logging.c client-commands.c parsing.c
+SRC:=main.c client.c logging.c commands-client.c parsing.c
 OBJ:=$(patsubst %.c,$(OBJ_DIR)/%.o,$(SRC))
 CLIENT:=$(addprefix $(BUILD_DIR)/,client)
 
 IP?=127.0.0.1
 PORT?=8000
-DIR?=$(HOME)
 ifeq ($(INET),1)
 	CFLAGS+= -DINET
 endif
@@ -27,7 +26,7 @@ all: $(CLIENT)
 
 run-client: $(CLIENT)
 	@clear
-	./$(CLIENT) $(IP) $(PORT) $(DIR)
+	$(CLIENT) $(IP) $(PORT)
 
 $(CLIENT): $(OBJ) | make-dir
 	$(CC) -o $@ $^ 

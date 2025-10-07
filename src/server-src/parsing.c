@@ -1,6 +1,7 @@
 #include "parsing.h"
 #include "logging.h"
 #include <string.h>
+#include <stdio.h>
 
 bool isasemicolon(int c)
 {
@@ -77,13 +78,13 @@ int parse_request_get_file(char *request, char *file, size_t file_size)
 	 * file[1] = i
 	 * file[2] = l 
 	 * and so on until the newline is met */
-	while (*request != '\0' && *request != '\n' && i < file_size) 
+	while (*request != '\0' && *request != '\n' && i != file_size - 1) 
 	{
 		file[i++] = *request++;
 	}
 	file[i] = '\0';
 
-	if (i < file_size) 
+	if (i == file_size - 1) 
 	{ 
 		return ERROR_OVERFLOW; 
 	}
@@ -118,15 +119,20 @@ char *parse_request_get_command(char *command)
 
 char *parse_request_get_payload(char *payload)
 {
-	char *p;
-	for (p = payload; *p != '\n'; p++)
+	char *p = payload;
+	while (*p != '\0')
 	{
-		if (isanewline(*p)) {
+		if (isanewline(*p))
+		{
 			payload = p;
-			*p = '\0';
-			payload++;
-			return payload;
+			break;
 		}
+		p++;
 	}
-	return NULL;
+
+	if (!payload) 
+	{
+		return payload;
+	}
+	return ++payload;
 }

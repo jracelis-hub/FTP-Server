@@ -6,7 +6,7 @@
 
 #include "logging.h"
 #include "client.h"
-#include "client-commands.h"
+#include "commands-client.h"
 
 int main(int argc, char *argv[]) {
 	
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 		client_set_buffers_zero(&client_handle);
 
 		client_received_bytes_from_server(&client_handle);
-		if (client_handle.received_bytes < 0) 
+		if (client_handle.receive_bytes < 0) 
 		{
 			error_msg("Could not receive bytes from server");
 			close(socket_fd);

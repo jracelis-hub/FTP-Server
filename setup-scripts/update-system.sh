@@ -6,7 +6,8 @@ GREEN="\033[32m"
 YELLOW="\033[33m"
 BLUE="\033[34m"
 
-update-system () {
+update-system() 
+{
 	echo -e "${YELLOW}Updating system...${RESET}"
 	sudo apt-get update -y
 	echo -e "${YELLOW}Upgrading system...${RESET}"
