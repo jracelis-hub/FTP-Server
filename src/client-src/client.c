@@ -125,40 +125,7 @@ void client_set_buffers_zero(client_handler_t *client_handle)
 
 void client_received_bytes_from_server(client_handler_t *client_handle)
 {
-	if (client_handle->command == EMPTY)
-	{
-		client_handle->received_bytes = recv(client_handle->socket_fd, client_handle->request, 
-											 client_handle->request_size, 0);
-		if (client_handle->received_bytes == 0) 
-		{
-			return;
-		}
-		else if (client_handle->received_bytes < 0) 
-		{
-			return;
-		}
-		
-		client_handle->request[client_handle->received_bytes] = '\0';
-
-		printf("Received %zu bytes\n", client_handle->received_bytes);
-		printf("%s", client_handle->request);
-	}
-
-	client_handle->received_bytes = recv(client_handle->socket_fd, client_handle->request, 
-										 client_handle->request_size, 0);
-	if (client_handle->received_bytes == 0) 
-	{
-		return;
-	}
-	else if (client_handle->received_bytes < 0) 
-	{
-		return;
-	}
-	
-	client_handle->request[client_handle->received_bytes] = '\0';
-
-	printf("Received %zu bytes\n", client_handle->received_bytes);
-	printf("%s", client_handle->request);
+	command_handler(client_handle)
 }
 
 void client_send_request_to_server(client_handler_t *client_handle)

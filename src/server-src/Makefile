@@ -12,7 +12,7 @@ INET6=-DINET6
 
 OBJ_DIR=./obj
 BUILD_DIR=./build
-SRC:=main.c logging.c server.c thread.c commands.c parsing.c
+SRC:=main.c logging.c server.c thread.c commands-thread.c parsing.c
 OBJ:=$(patsubst %.c,$(OBJ_DIR)/%.o,$(SRC))
 SERVER:=$(addprefix $(BUILD_DIR)/,server)
 

@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -69,6 +68,7 @@ int main(int argc, char *argv[]) {
 	if (client_print_connection_message(&server) < 0) 
 	{
 		error_msg("Could not resolve server information");
+		return -2;
 	}
 
 	/* Creates a client handler to be used for communication

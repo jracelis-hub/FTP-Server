@@ -1,4 +1,6 @@
 #include "parsing.h"
+#include "logging.h"
+#include <ctype.h>
 #include <string.h>
 
 bool isasemicolon(int c)
@@ -6,8 +8,8 @@ bool isasemicolon(int c)
 	bool semicolon = true;
 
 	if ((char)c == ';')
-	{ 
-		return semicolon; 
+	{
+		return semicolon;
 	}
 	
 	semicolon = false;
@@ -19,8 +21,8 @@ bool isaslash(int s)
 	bool slash = true;
 
 	if ((char)s == '/')
-	{ 
-		return slash; 
+	{
+		return slash;
 	}
 	
 	slash = false;
@@ -32,8 +34,8 @@ bool isaspace(int s)
 	bool space = true;
 
 	if ((char)s == ' ')
-	{ 
-		return space; 
+	{
+		return space;
 	}
 
 	space = false;
@@ -45,25 +47,125 @@ bool isanewline(int n)
 	bool newline = true;
 
 	if ((char)n == '\n')
-	{ 
-		return newline; 
+	{
+		return newline;
 	}
 	
 	newline = false;
 	return newline;
 }
 
-bool isdirectoryformat(char *directory)
+bool isaperiod(int p)
 {
-	bool dir = true;
+	bool period = true;
 
-	size_t dir_len = strlen(directory);
-
-	if ( *(directory + dir_len - 1) == '/')
-	{ 
-		return dir; 
+	if ((char)p == '.')
+	{
+		return period;
 	}
 	
-	dir = false;
-	return dir;
+	period = false;
+	return period;
+}
+
+int parse_request_get_file(char *request, char *file, size_t file_size)
+{
+	int i = 0;
+	char *p;
+	for (p = request; *p != '\0' && *p != '\n'; p++) 
+	{
+		/* The following looks for a ; / or a ' ' if the following is met
+		 * the pointer to request will be set after it 
+		 * Example: Download; /path/file.txt\n
+		 * once Download; request is now pointing to _/path/file.txt
+		 * until is is left with file.txt                          */
+		if (isasemicolon(*p) || isaslash(*p) || isaspace(*p)) {
+			request = p;
+			request++;
+		}
+	}
+
+	/* Starting from the pointed location set from the for loop above 
+	 * each character is placed into the array that was passed into         
+	 * file[0] = f
+	 * file[1] = i
+	 * file[2] = l 
+	 * and so on until the newline is met */
+	while (*request != '\0' && *request != '\n' && i < file_size) 
+	{
+		file[i++] = *request++;
+	}
+	file[i] = '\0';
+
+	if (i < file_size) 
+	{ 
+		return ERROR_OVERFLOW; 
+	}
+
+	return SUCCESS;
+}
+
+int parse_request_get_file_path(char *reply, char *file, size_t file_size)
+{
+	char *p;
+	for (p = reply; *p != '\0' && *p != '\n'; p++)
+	{
+		if (!strncmp(reply, "..", 2) || isaslash(*p) 
+		    || isaperiod(*p) isalpha(*p))
+		{
+			reply = p;
+			break;
+		}
+	}
+
+	int i = 0;
+	while (reply != '\0' && reply '\n' && i < file_size)
+	{
+		file[i++] = *reply++;
+	}
+	file[i] = '\0';
+
+	if (i < file_size) { return ERROR_OVERFLOW; }
+
+	return SUCCESS;
+}
+
+char *parse_request_get_command(char *command)
+{
+	char *p;
+	for (p = command; *p != '\0'; p++)
+	{
+		/* Looks for the semi-colon once found 
+		 * increments past the semi-colon and
+		 * null teriminate the string and return it */
+		if (isasemicolon(*p)) 
+		{
+			*(p + 1) = '\0';
+			return command;
+		}
+		/* For the request does not return a proper format
+		 * the next item it looks for is a newline/linefeed
+		 * if found it returns the invalid request sent  */
+		else if (isanewline(*p)) 
+		{
+			*p = '\0';
+			return command;
+		}
+	}
+	return NULL;
+}
+
+char *parse_request_get_payload(char *payload)
+{
+	char *p;
+	for (p = payload; *p != '\n'; p++)
+	{
+		if (isanewline(*p)) {
+			payload = p;
+			*p = '\0';
+			payload++;
+			return payload;
+		}
+	}
+	return NULL;
 }

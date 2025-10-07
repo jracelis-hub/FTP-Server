@@ -10,23 +10,30 @@ BLUE="\033[34m"
 # Pulls name of the network information for wlan0
 NET_NAME="$(nmcli c show | awk '/wlan0/ {print $1}')"
 
-get_ip () {
+get_ip() 
+{
         echo -en "${YELLOW}Enter IPv4 address:${RESET} "
+		# Values are preset use arrow keys to change value
         read -e -i "192.168.0.xxx/24" IP
 }
 
-get_gateway () {
+get_gateway() 
+{
         echo -en "${YELLOW}Enter gateway address:${RESET} "
+		# Values are preset use arrow keys to change value
         read -e -i "192.168.0.1" GATEWAY
 }
 
-get_dns () {
+get_dns() 
+{
         echo -en "${YELLOW}Enter DNS address:${RESET} "
+		# Values are preset use arrow keys to change value
         read -e -i "8.8.8.8 1.1.1.1" DNS
 }
 
 # Double check if the following information is good
-verify () {
+verify() 
+{
         echo -e "IP = ${BLUE}${IP}${RESET}"
         echo -e "Gateway = ${BLUE}${GATEWAY}${RESET}"
         echo -e "DNS = ${BLUE}${DNS}${RESET}"
@@ -51,13 +58,15 @@ manual_mode () {
         echo "done"
 }
 
-reset_connection () {
+reset_connection() 
+{
         echo -e "Resetting network..."
         sudo nmcli connection down "${NET_NAME}"
         sudo nmcli connection up "${NET_NAME}"
 }
 
-verbose_mode () {
+verbose_mode() 
+{
         echo -e "${YELLOW}Beginning manual configuration...${RESET}"
         get_ip
         get_gateway
