@@ -36,7 +36,7 @@ Since I have been working with Unix based systems, I wanted to design this progr
 
 The network stack, consist of using `TCP`, that supports either `IPv6` or `IPv4`. The purpose of using `TCP` is to ensure data is transfer over the network consistly and reliablily over the network.
 
-For handling multiple connections, I went with pthreads threads approach. Since, the amount requests client devices is less than 10 on my private network. There are altnative approaches using event based APIs like `select()` or `poll()` for a more scalable approach.
+For handling multiple connections, I went with `pthreads` (POSIX threads). Since, the amount requests client devices is less than 10 on my private network. There are altnative approaches using event based APIs like `select()` or `poll()` for a more scalable approach.
 
 Although encryption is essential when sending data over the internet for security and privacy, this program will not include it as the transfers be within my _LAN_ (local area network).
 
@@ -48,11 +48,11 @@ The hosts are broken down to the client <-> server model.
 
 The server being the FTP server (replier) and client is the user (requestor).
 
-The server will be listen on a its own configured port and will be _"mounted"_ around a specified directory on the server.
+The server will be listen on a its own configured port and will be ***"mounted"*** around a specified directory on the server.
 
-Using the base set of rules and structure, the flow consists of the Data Transfer Process (DTP) and Command Process (CP).
+Using the base set of rules and structure, the flow consists of the **Data Transfer Process** (DTP) and **Command Process** (CP).
 
-**Data Transfer Process** - the process of the server sending over requested information from the client(user).
+**Data Transfer Process** - the process of the server sending over requested information from the client (user).
 
 **Command Process** - a set of commands that the client (user) requests to determine the correct data transfer process.
 
@@ -89,11 +89,11 @@ Using the base set of rules and structure, the flow consists of the Data Transfe
 ### Command Process
 
 The command process has 5 key components:
-1. Request - the `request` represents the command process as a whole, always containing the header and the command type.
-2. Header - the header holds the information of what the server needs to conduct data transfer process. Header always has a command but doesn't always have a file/file path.
-3. Command - the command is a command process that lets the server know which data transfer needs to occur when replying back to the client.
-4. File - the file or the file path that the server conducts the data transfer process on.
-5. Payload - the payload is the data that is being transfer to `upload` onto the server.
+1. **Request** - the `request` represents the command process as a whole, always containing the header and the command type.
+2. **Header** - the header holds the information of what the server needs to conduct data transfer process. Header always has a command but doesn't always have a file/file path.
+3. **Command** - the command is a command process that lets the server know which data transfer needs to occur when replying back to the client.
+4. **File** - the file or the file path that the server conducts the data transfer process on.
+5. **Payload** - the payload is the data that is being transfer to `upload` onto the server.
 
 ![request flow](images/request_diagram.png "Request Format")
 
@@ -102,7 +102,7 @@ The command process has 5 key components:
 > [!IMPORTANT]
 > The following testing was conducted in a Linux environment. With the usage of `pthreads` POSIX threads. To have the best results use WSL, Ubuntu or Raspbian (RPi OS). 
 
-If not in a Linux environmnet go to [environment setup](#environment-setup).
+If not in a Linux environment go to [environment setup](#environment-setup).
 
 To clone the repo run the following:
 ```
@@ -122,7 +122,7 @@ Set up password and other installation requirements as prompted.
 Once installed, just type wsl on the command prompt and it will open the WSL terminal.
 
 The WSL2 version used:
-```
+```bash
 wsl -v
 WSL version: 2.5.9.0
 Kernel version: 6.6.87.2-1
@@ -138,13 +138,16 @@ Windows version: 10.0.26100.4946
 
 Run the following script [update-system.sh](setup-scripts/update-system.sh) to make sure system is up to date.
 ```bash
-chmod +x update-system.sh && ./update-system.sh
-# Or
-bash update-system.sh
+cd setup-scripts && chmod +x update-system.sh && ./update-system.sh
+```
+Or
+```bash
+cd setup-scripts && bash update-system.sh
 ```
 
-
 #### Raspberry Pi
+
+#### Build of Materials
 
 <table>
 	<thead align="center">
