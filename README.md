@@ -187,6 +187,40 @@ Or
 ```bash
 cd setup-scripts && bash update-system.sh
 ```
+---
+</details>
+<details>
+<summary>Hyper V</summary>
+
+For offical documentation of how to install Hyper V use [Install Hyper-V](https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/install-hyper-v?tabs=gui&pivots=windows).
+
+To download through gui version which I will be highlighting go start menu or `window` + `r` and type control panel 
+- Control Panel -> Programs and Features
+- Left side click `Turn Windows features on or off`
+- Scroll down to `Hyper V` and check the box off
+- Reboot may be required
+
+Open up `Hyper-V Manager` and for quick installation do the following:
+- `Quick Create...` on the right side of the task bar
+- Click `Ubuntu LTS` 
+- Create Virtual Machine
+
+> [!WARNING]
+> The LTS support may not be up to date download from [Ubuntu](https://ubuntu.com/download/desktop/thank-you?version=24.04.3&architecture=amd64&lts=true) for the up to date version.
+
+Walk through the set up once set up do the following:
+```
+git clone https://github.com/jracelis-hub/FTP-Server.git
+```
+Run the following script [update-system.sh](setup-scripts/update-system.sh) to make sure system is up to date.
+```bash
+cd setup-scripts && chmod +x update-system.sh && ./update-system.sh
+```
+Or
+```bash
+cd setup-scripts && bash update-system.sh
+```
+---
 </details>
 
 > [!NOTE]
