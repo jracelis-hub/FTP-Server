@@ -145,6 +145,53 @@ Or
 cd setup-scripts && bash update-system.sh
 ```
 
+#### Virtual Machine
+
+The two options that I will highlight is either:
+1. [Orcale Virtual Box](https://www.virtualbox.org/wiki/Downloads)
+2. Hyper-V
+
+Go to the following drop down to get software up in running but in the mean time download the following Linux Distrobution you plan on using.
+- [Ubuntu](https://ubuntu.com/download/desktop/thank-you?version=24.04.3&architecture=amd64&lts=true) 24.04.3 LTS
+
+<details>
+<summary>Orcale Virtual Box</summary>
+
+To set up Orcale Virtual Box go through the steps by clicking the following link [Orcale Virtual Box Download](https://www.virtualbox.org/wiki/Downloads)
+
+Click the following download based on the type of Operating System.
+
+Example: Click [here](https://download.virtualbox.org/virtualbox/7.2.2/VirtualBox-7.2.2-170484-Win.exe) for the windows download.
+
+Once download is complete and installed, go through the steps of creating a virtual machine.
+
+Click `New` and input the following information:
+- `VM Name` Input Information
+- `ISO Image` Add which ever you are using [Ubuntu](https://ubuntu.com/download/desktop/thank-you?version=24.04.3&architecture=amd64&lts=true)
+- `User Name` & `Password`
+- `Hostname`
+- Allocate `RAM` `CPU` and `Disk` space
+Hit finish
+
+From there boot up the system.
+
+Once booted up in the termial do the following:
+```
+git clone https://github.com/jracelis-hub/FTP-Server.git
+```
+Run the following script [update-system.sh](setup-scripts/update-system.sh) to make sure system is up to date.
+```bash
+cd setup-scripts && chmod +x update-system.sh && ./update-system.sh
+```
+Or
+```bash
+cd setup-scripts && bash update-system.sh
+```
+</details>
+
+> [!NOTE]
+> But if using Hyper-V might as well take the extra step and install `wsl`
+
 #### Raspberry Pi
 
 #### Build of Materials
