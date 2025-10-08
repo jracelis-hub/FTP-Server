@@ -46,17 +46,17 @@ The FTP (File Transfer Protocol) concepts and details utilized for this project 
 
 The hosts are broken down to the client <-> server model. 
 
-The server being the FTP server (replier) and client is the user (requestor).
+The server being the FTP server (`replier`) and client is the user (`requestor`).
 
 The server will be listen on a its own configured port and will be ***"mounted"*** around a specified directory on the server.
 
-Using the base set of rules and structure, the flow consists of the **Data Transfer Process** (DTP) and **Command Process** (CP).
+Using the base set of rules and structure, the flow consists of the **Data Transfer Process** and **Command Process**.
 
 **Data Transfer Process** - the process of the server sending over requested information from the client (user).
 
 **Command Process** - a set of commands that the client (user) requests to determine the correct data transfer process.
 
-<table>
+<table align="center">
 	<thead align="center">
 		<tr>
 			<th colspan="2">Command Table</th>
