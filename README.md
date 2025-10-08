@@ -5,6 +5,9 @@
 - [Design Philosophy](#design-philosophy)
 - [Requirements](#requirements)
 	- [Environment Setup](#environment-setup)
+		- [WSL](#wsl)
+		- [Virtual Machine](#virtual-machine)
+		- [Raspberry Pi](#raspberry-pi)
 - [Initial Testing](#initial-testing-v0-single-thread)
 - [Multi Thread](#multi-thread)
 		
@@ -104,11 +107,6 @@ The command process has 5 key components:
 
 If not in a Linux environment go to [environment setup](#environment-setup).
 
-To clone the repo run the following:
-```
-git clone https://github.com/jracelis-hub/FTP-Server.git
-```
-
 ### Environment Setup
 
 #### WSL 
@@ -205,7 +203,7 @@ Open up `Hyper-V Manager` and for quick installation do the following:
 - Click `Ubuntu LTS` 
 - Create Virtual Machine
 
-> [!WARNING]
+> [!CAUTION]
 > The LTS support may not be up to date download from [Ubuntu](https://ubuntu.com/download/desktop/thank-you?version=24.04.3&architecture=amd64&lts=true) for the up to date version.
 
 Walk through the set up once set up do the following:
@@ -256,31 +254,25 @@ cd setup-scripts && bash update-system.sh
 	</tbody>
 </table>
 
-To get the raspberry pi up and running
+**Installation**
 
-Sample:
-```bash
-pifive@raspberrypi:~ $ chmod +x manual-ip.sh && ./manual-ip.sh
-Beginning manual configuration...
-Enter IPv4 address: 192.168.0.251/24
-Enter gateway address: 192.168.0.1
-Enter DNS address: 8.8.8.8 1.1.1.1
-IP = 192.168.0.251/24
-Gateway = 192.168.0.1
-DNS = 8.8.8.8 1.1.1.1
-Does the follow information look correct [y/n]? y
-Changing ipv4.addresses to 192.168.0.251/24...
-done
-Changing ipv4.gateway to 192.168.0.1...
-done
-Changing ipv4.dns to 8.8.8.8 1.1.1.1...
-done
-Changing ipv4.method to manual...
-done
-Resetting network...
-```
+To get the Raspberry Pi up and running go to [Raspberry Pi](https://www.raspberrypi.com/software/) to download the RPi Imager and choose based on the system:
+- [Windows](https://downloads.raspberrypi.com/imager/imager_latest.exe)
+- [Mac](https://downloads.raspberrypi.com/imager/imager_latest.dmg)
 
-To find the raspberry pi on the network I use the command line utility `nmap`. To scan 
+Plug the micro SD card into computer and walk through the RPi Imager software
+- `Choose Device` Raspberry Pi 5... etc.
+- `Choose OS` Raspberry Pi OS -> Raspberry Pi OS Lite (64-bit)
+- `Choose Storage` and change configuration information
+	- Input hostname info
+	- Set up Wifi info
+	- Enable `SSH`
+
+Once everything is set up and flashed. Plug in micro SD card and power on RPi.
+
+The system should be in the network.
+
+To find the RPi on the network I use the command line utility `nmap`. To scan 
 
 To check if it is install type `nmap -v` to see the version. 
 
@@ -328,6 +320,27 @@ PORT   STATE SERVICE
 Since, my system DHCP server range is only from 192.168.0.2 - 192.168.0.200. I can determine which device was recently added to my _LAN_. 
 
 From there I ssh into to the Pi to get my system all setup. For the [Raspberry Pi](#raspberry-pi) section for setup.
+Sample:
+```bash
+pifive@raspberrypi:~ $ chmod +x manual-ip.sh && ./manual-ip.sh
+Beginning manual configuration...
+Enter IPv4 address: 192.168.0.251/24
+Enter gateway address: 192.168.0.1
+Enter DNS address: 8.8.8.8 1.1.1.1
+IP = 192.168.0.251/24
+Gateway = 192.168.0.1
+DNS = 8.8.8.8 1.1.1.1
+Does the follow information look correct [y/n]? y
+Changing ipv4.addresses to 192.168.0.251/24...
+done
+Changing ipv4.gateway to 192.168.0.1...
+done
+Changing ipv4.dns to 8.8.8.8 1.1.1.1...
+done
+Changing ipv4.method to manual...
+done
+Resetting network...
+```
 
 ## Testing
 
