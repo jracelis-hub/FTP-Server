@@ -32,9 +32,9 @@ With this project, I wanted to challenge myself in learning networking programmi
 
 ## Design Philosophy
 
-Since I have been working with Unix based systems, I wanted to design this program to be as POSIX (Portable Operating System Interface) compliant as possible. Emphasising on portablility.
+Since I have been working with Unix based systems, I wanted to design this program to be POSIX (Portable Operating System Interface) compliant.
 
-The network stack, consist of using **TCP** and will only support IPv4... but with a couple tweeks it could also support IPv6. The purpose of using **TCP** is to ensure the proper data is transfered over the network with consistent reliability. 
+The network stack, consist of using `TCP`, that supports either `IPv6` or `IPv4`. The purpose of using `TCP` is to ensure data is transfer over the network consistly and reliablily over the network.
 
 For handling multiple connections, I went with pthreads threads approach. Since, the amount requests client devices is less than 10 on my private network. There are altnative approaches using event based APIs like `select()` or `poll()` for a more scalable approach.
 
@@ -42,7 +42,7 @@ Although encryption is essential when sending data over the internet for securit
 
 ![program flow](images/flow_chart.png "Program Flow Chart")
 
-The FTP (File Transfer Protocol) rules and details utilized for this project is found in [RFC 959](#https://datatracker.ietf.org/doc/html/rfc959#ref-1). 
+The FTP (File Transfer Protocol) concepts and details utilized for this project is found in [RFC 959](https://datatracker.ietf.org/doc/html/rfc959#ref-1). 
 
 The hosts are broken down to the client <-> server model. 
 
@@ -54,7 +54,7 @@ Using the base set of rules and structure, the flow consists of the Data Transfe
 
 **Data Transfer Process** - the process of the server sending over requested information from the client(user).
 
-**Command Process** - a set of commands that the client(user) requests to determine the correct data transfer process.
+**Command Process** - a set of commands that the client (user) requests to determine the correct data transfer process.
 
 <table>
 	<thead align="center">
@@ -86,12 +86,40 @@ Using the base set of rules and structure, the flow consists of the Data Transfe
 	</tbody>
 </table>
 
-![request flow](images/request_diagram.png "Request Format")
+### Command Process
 
+The command process has 5 key components:
+1. Request - the `request` represents the command process as a whole, always containing the header and the command type.
+2. Header - the header holds the information of what the server needs to conduct data transfer process. Header always has a command but doesn't always have a file/file path.
+3. Command - the command is a command process that lets the server know which data transfer needs to occur when replying back to the client.
+4. File - the file or the file path that the server conducts the data transfer process on.
+5. Payload - the payload is the data that is being transfer to `upload` onto the server.
+
+![request flow](images/request_diagram.png "Request Format")
 
 ## Requirements
 
-To run the following program a linux environment is needed. I have tested this on WSL (Windows Subsystem for Linux) and Debian-based Linux distributions such as Ubuntu and Raspbian (Raspberry Pi OS).
+> [!IMPORTANT]
+> The following testing was conducted in a Linux environment. With the usage of `pthreads` POSIX threads. To have the best results use WSL, Ubuntu or Raspbian (RPi OS). 
+
+If not in a Linux environmnet go to [environment setup](#environment-setup).
+
+To clone the repo run the following:
+```
+git clone https://github.com/jracelis-hub/FTP-Server.git
+```
+
+### Environment Setup
+
+#### WSL 
+
+To install WSL on Windows open up the command prompt and type:
+```
+wsl --install
+```
+Set up password and other installation requirements as prompted.
+
+Once installed, just type wsl on the command prompt and it will open the WSL terminal.
 
 The WSL2 version used:
 ```
@@ -105,20 +133,6 @@ DXCore version: 10.0.26100.1-240331-1435.ge-release
 Windows version: 10.0.26100.4946
 ```
 
-### Environment Setup
-
-Methods:
-
-#### WSL 
-
-To install WSL on Windows open up the command prompt and type:
-```
-wsl --install
-```
-Set up password and other installation requirements as prompted.
-
-Once installed, just type wsl on the command prompt and it will open the WSL terminal.
-
 > [!TIP]
 > Also just use `window + r` and type wsl to open it.
 
@@ -129,54 +143,6 @@ chmod +x update-system.sh && ./update-system.sh
 bash update-system.sh
 ```
 
-To find the raspberry pi on the network I use the command line utility `nmap`. To scan 
-
-To check if it is install type `nmap -v` to see the version. 
-
-Example:
-```bash
-Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-08-25 09:40 PDT
-Read data files from: /usr/bin/../share/nmap
-WARNING: No targets were specified, so 0 hosts scanned.
-Nmap done: 0 IP addresses (0 hosts up) scanned in 0.01 seconds
-```
-
-> [!NOTE]
-> If nmap is not installed no version will be shown. Run the following to install it on the system.
-
-```bash
-sudo apt install nmap -y
-```
-
-Once everything is installed run the following to find which devices have port 22 (_ssh_) opened on the network
-```bash
-nmap -p 22 192.168.0.1/24 | grep -B 4 open
-```
-
-The following command will scan the whole host subnet looking for open (ssh) port 22 and capturing the following IPv4 address.
-```bash
-Nmap scan report for 192.168.0.135
-Host is up (0.055s latency).
-
-PORT   STATE SERVICE
-22/tcp open  ssh
---
-Nmap scan report for 192.168.0.245
-Host is up (0.052s latency).
-
-PORT   STATE SERVICE
-22/tcp open  ssh
---
-Nmap scan report for 192.168.0.250
-Host is up (0.021s latency).
-
-PORT   STATE SERVICE
-22/tcp open  ssh
-```
-
-Since, my system DHCP server range is only from 192.168.0.2 - 192.168.0.200. I can determine which device was recently added to my _LAN_. 
-
-From there I ssh into to the Pi to get my system all setup. For the [Raspberry Pi](#raspberry-pi) section for setup.
 
 #### Raspberry Pi
 
@@ -230,47 +196,54 @@ done
 Resetting network...
 ```
 
-Ubuntu
+To find the raspberry pi on the network I use the command line utility `nmap`. To scan 
 
-Raspbian
+To check if it is install type `nmap -v` to see the version. 
 
-## Initial Testing V0 Single Thread
-
-v0 format file structure is broken down into the following format:
+Example:
+```bash
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-08-25 09:40 PDT
+Read data files from: /usr/bin/../share/nmap
+WARNING: No targets were specified, so 0 hosts scanned.
+Nmap done: 0 IP addresses (0 hosts up) scanned in 0.01 seconds
 ```
-├── Makefile
-├── build
-│   ├── c_obj
-│   │   ├── client.o
-│   │   ├── main.o
-│   │   └── net_utility.o
-│   ├── s_obj
-│   │   ├── commands.o
-│   │   ├── main.o
-│   │   ├── net_utility.o
-│   │   └── server.o
-│   ├── start-client
-│   └── start-server
-├── include
-│   ├── commands.h
-│   └── net_utility.h
-└── src
-    ├── client.c
-    ├── commands.c
-    ├── main.c
-    ├── net_utility.c
-    ├── server.c
-    └── unit-test.c
-```
-
-The [v0](v0/my_networking.c) was to create the bare skeleteon of the program itself to check for any error handling and to validate if the user input arguments are within the lengths of IPv4 and not utilizing any of the known ports below 1024. 
 
 > [!NOTE]
-> See [my_network.h](src/Version_0/my_networking.h) for defined macros.
+> If nmap is not installed no version will be shown. Run the following to install it on the system.
 
-My initial testing consist of:
+```bash
+sudo apt install nmap -y
+```
 
-- Proper command line 
-See source code [version](src/Version_0/my_networking.c)
+Once everything is installed run the following to find which devices have port 22 (_ssh_) opened on the network
+```bash
+nmap -p 22 192.168.0.1/24 | grep -B 4 open
+```
 
-## Multi Thread 
+The following command will scan the whole host subnet looking for open (ssh) port 22 and capturing the following IPv4 address.
+```bash
+Nmap scan report for 192.168.0.135
+Host is up (0.055s latency).
+
+PORT   STATE SERVICE
+22/tcp open  ssh
+--
+Nmap scan report for 192.168.0.245
+Host is up (0.052s latency).
+
+PORT   STATE SERVICE
+22/tcp open  ssh
+--
+Nmap scan report for 192.168.0.250
+Host is up (0.021s latency).
+
+PORT   STATE SERVICE
+22/tcp open  ssh
+```
+
+Since, my system DHCP server range is only from 192.168.0.2 - 192.168.0.200. I can determine which device was recently added to my _LAN_. 
+
+From there I ssh into to the Pi to get my system all setup. For the [Raspberry Pi](#raspberry-pi) section for setup.
+
+## Testing
+
