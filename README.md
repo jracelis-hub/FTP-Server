@@ -10,6 +10,7 @@
 		
 ## Features
 
+Support
 - :white_check_mark: Multi-threaded 
 - :white_check_mark: TCP with IPv4 or IPv6 Support
 - :white_check_mark: Command Line Interface
@@ -19,6 +20,7 @@
 - :white_check_mark: POSIX Compliant
 - :white_check_mark: File Transfer Size 4 KiB
 
+Unsupported
 - :x: Windows
 - :x: Encryption
 
