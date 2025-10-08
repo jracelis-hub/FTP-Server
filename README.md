@@ -11,14 +11,14 @@
 ## Features
 
 Haves
-- :white_check_mark: Multi-threaded 
-- :white_check_mark: TCP with IPv4 or IPv6 Support
-- :white_check_mark: Command Line Interface
-- :white_check_mark: File Transfer (text)
-- :white_check_mark: Half-Duplex
-- :white_check_mark: Server <-> Client Model
-- :white_check_mark: POSIX Compliant
-- :white_check_mark: File Transfer Size 4 KiB
+- [x] Multi-threaded 
+- [x] TCP with IPv4 or IPv6 Support
+- [x] Command Line Interface
+- [x] File Transfer (text)
+- [x] Half-Duplex
+- [x] Server <-> Client Model
+- [x] POSIX Compliant
+- [x] File Transfer Size 4 KiB
 
 Wants
 - [ ] Windows
