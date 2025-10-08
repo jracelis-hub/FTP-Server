@@ -21,8 +21,8 @@ Haves
 - :white_check_mark: File Transfer Size 4 KiB
 
 Wants
-- [] Windows
-- [] Encryption
+- [ ] Windows
+- [ ] Encryption
 
 ## Overview
 
