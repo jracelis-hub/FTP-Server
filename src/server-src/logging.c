@@ -3,7 +3,8 @@
 
 void format(int count,const char character) 
 {
-	for (int i=0 ; i<count ; i++) 
+	int i;
+	for (i = 0; i < count; i++) 
 		putc(character,stdout);
 	putc('\n',stdout);
 }
@@ -30,10 +31,11 @@ void perform_msg(const char *message)
 void pass_msg(void) 
 {
 	int count = 35;	
-	for (int i = 0; i < count; i++) 
+	int i;
+	for (i = 0; i < count; i++) 
 	{
 		putchar('-');
-		if ( i == count - 1 ) 
+		if (i == count - 1) 
 		{
 			putchar('>');
 			puts(" Done");

@@ -141,6 +141,7 @@ int server_set_directory(char *directory, size_t directory_size, char *directory
 {
 	/* Checks if the directory ends with a / if not it will append it to the end */
 	size_t dir_arg_len = strlen(directory_arg);
+
 	if (directory_arg[dir_arg_len - 1] != '/' && dir_arg_len < directory_size - 1)
 	{
 		strcpy(directory, directory_arg);	
@@ -185,7 +186,7 @@ int server_create_thread(int client_fd, char *directory, struct sockaddr_storage
 	
 	/* pthread_attr_setdetachstate is set to detach 
 	 * the detach state allows each thread to handle its own 
-	 * communicate with the client and * free its resources when done                   
+	 * communicate with the client and free its resources when done                   
 	 */
 	if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) != 0) 
 	{

@@ -43,7 +43,7 @@ void thread_set_buffers_zero(thread_handler_t *thread_handle)
 	memset(thread_handle->reply, 0, thread_handle->reply_size);
 }
 
-void thread_send_welcome_message(int client_fd, ssize_t *send_bytes)
+void thread_send_welcome_message(thread_handler_t *thread_handle)
 {
 	const char *welcome_message = 
 	"--------------------------------\n"
@@ -58,10 +58,10 @@ void thread_send_welcome_message(int client_fd, ssize_t *send_bytes)
 	"--------------------\n";
 
 	/* Send welcome message + '\0' byte */
-	*send_bytes = send(client_fd, welcome_message, 
+	thread_handle->send_bytes = send(thread_handle->thread_fd, welcome_message, 
 	                   strlen(welcome_message) + 1, 0);
-	if (*send_bytes == 0) { return; }
-	else if (*send_bytes < 0) { return; }
+	if (thread_handle->send_bytes == 0) { return; }
+	else if (thread_handle->send_bytes < 0) { return; }
 }
 
 void *thread_handle_client(void *args)
@@ -93,7 +93,7 @@ void *thread_handle_client(void *args)
 		return NULL;
 	}
 
-	thread_send_welcome_message(thread_handle.thread_fd, &thread_handle.send_bytes);
+	thread_send_welcome_message(&thread_handle);
 	if (thread_handle.send_bytes < 0)
 	{
 		error_msg("Could not send bytes");

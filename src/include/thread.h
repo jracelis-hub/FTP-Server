@@ -42,7 +42,7 @@ void thread_set_thread_handler(thread_handler_t *thread_handle, server_thread_t 
 /* thread utilities that prints accept and disconnection message */
 int thread_print_accept_connection_message(struct sockaddr_storage *client_address);
 int thread_print_disconnect_message(struct sockaddr_storage *client_address);
-void thread_send_welcome_message(int client_fd, ssize_t *send_bytes);
+void thread_send_welcome_message(thread_handler_t *thread_handle);
 
 /* Send and receive operation thread <-> client */
 void thread_receive_bytes_from_client(thread_handler_t *thread_handle);

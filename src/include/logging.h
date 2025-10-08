@@ -13,6 +13,7 @@
 #define ERROR_NAMEINFO (-8)
 #define ERROR_COMMAND (-9)
 #define ERROR_BYTES (-10)
+#define ERROR_NULL (-11)
 #define ERROR_SERVER (-20)
 #define ERROR_SOCKET_OPT (-30)
 

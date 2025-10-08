@@ -119,7 +119,6 @@ int main(int argc, char *argv[])
 		if (client_fd < 0) 
 		{
 			error_msg("Could not accept connection");
-			sleep(.5);
 			continue;
 		}
 		
@@ -127,11 +126,8 @@ int main(int argc, char *argv[])
 		{
 			error_msg("Could not create thread");
 			close(client_fd);
-			sleep(.5);
 			continue;
 		}
-
-		sleep(.5);
 	}
 
 	close(listen_fd);

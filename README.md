@@ -1,5 +1,6 @@
 # FTP Server
 
+- [Features](#features)
 - [Overview](#overview)
 - [Design Philosophy](#design-philosophy)
 - [Requirements](#requirements)
@@ -7,13 +8,25 @@
 - [Initial Testing](#initial-testing-v0-single-thread)
 - [Multi Thread](#multi-thread)
 		
+## Features
+
+- [x] Multi-threaded 
+- [x] TCP with IPv4 or IPv6 Support
+- [x] Command Line Interface
+- [x] File Transfer (text)
+- [x] Half-Duplex
+- [x] Server <-> Client Model
+- [x] POSIX Compliant
+- [x] File Transfer Size 4 KiB
+
+- [] Windows
+- [] Encryption
+
 ## Overview
 
 I found myself working between different devices under my network. I currently have my desktop and two Raspbery Pis that I tend to transfer different files from one play to another via using `scp`. 
 
 With this project, I wanted to challenge myself in learning networking programming on a lower level. While there are many protocols and services to transfer files from one device to another `scp` `ftp` `ftps`... etc. I thought this would be a great learning experience to create my own file transfer program in C.
-
-After gaining knowledge on the Linux OS and intercommunication that is happening between embedded devices on my current job, I thought this would a great way to test my skills but also strengthen my ability to understand networking and systems on a lower level.
 
 ## Design Philosophy
 
@@ -71,7 +84,8 @@ Using the base set of rules and structure, the flow consists of the Data Transfe
 	</tbody>
 </table>
 
-The information of 
+![request flow](images/request_diagram.png "Request Format")
+
 
 ## Requirements
 

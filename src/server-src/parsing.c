@@ -88,13 +88,17 @@ int parse_request_get_file(char *request, char *file, size_t file_size)
 	{ 
 		return ERROR_OVERFLOW; 
 	}
+	else if (!request) 
+	{
+		return ERROR_NULL;
+	}
 
 	return SUCCESS;
 }
 
 char *parse_request_get_command(char *command)
 {
-	char *p;
+	char *p = NULL;
 	for (p = command; *p != '\0'; p++)
 	{
 		/* Looks for the semi-colon once found 
