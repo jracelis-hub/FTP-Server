@@ -203,8 +203,7 @@ Open up `Hyper-V Manager` and for quick installation do the following:
 - Click `Ubuntu LTS` 
 - Create Virtual Machine
 
-> [!CAUTION]
-> The LTS support may not be up to date download from [Ubuntu](https://ubuntu.com/download/desktop/thank-you?version=24.04.3&architecture=amd64&lts=true) for the up to date version.
+> Note: The LTS support may not be up to date download from [Ubuntu](https://ubuntu.com/download/desktop/thank-you?version=24.04.3&architecture=amd64&lts=true) for the up to date version.
 
 Walk through the set up once set up do the following:
 ```
