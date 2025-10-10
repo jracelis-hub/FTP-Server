@@ -6,8 +6,8 @@
 - [Features](#features)
 - [Overview](#overview)
 - [Design Philosophy](#design-philosophy)
-	- [Data Transfer Overview](#command-process-overview)
-	- [Command Process Overview](#command-process-overview)
+	- [Architecture Overview](#command-process-overview)
+	- [Command Process](#command-process-overview)
 	- [Memory Layout](#memory-layout)
 - [Requirements](#requirements)
 - [Testing](#testing)
@@ -90,9 +90,11 @@ Using the base set of rules and structure, the flow consists of the **Data Trans
 	</tbody>
 </table>
 
-### Data Transfer Overview
+### Architecture Overview
 
-### Command Process Overview
+![ftp architecture](images/ftp_architecture.png "FTP Architecture")
+
+### Command Process
 
 The command process has 5 key components:
 1. **Request** - the `request` represents the command process as a whole, always containing the header and the command type.
