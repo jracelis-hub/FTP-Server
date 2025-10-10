@@ -20,13 +20,15 @@ ifeq ($(INET6),1)
 	CFLAGS+= -DINET6
 endif
 
-.PHONY: run-client clean make-dir
+.PHONY: run-client build-client clean make-dir all
 
 all: $(CLIENT)
 
 run-client: $(CLIENT)
 	@clear
 	$(CLIENT) $(IP) $(PORT)
+
+build-client: $(CLIENT)
 
 $(CLIENT): $(OBJ) | make-dir
 	$(CC) -o $@ $^ 

@@ -4,7 +4,6 @@ WFLAGS=-Wall -Werror
 INCLUDE=-I../include
 CFLAGS=$(WFLAGS) $(INCLUDE)
 
-
 # Optional flags 
 DFLAGS=-DDEBUG
 INET=-DINET
@@ -18,7 +17,7 @@ SERVER:=$(addprefix $(BUILD_DIR)/,server)
 
 DEBUG?=0
 IP?=127.0.0.1
-PORT?=8000
+PORT?=2121
 DIR?=$(HOME)
 ifeq ($(INET),1)
 	CFLAGS+= -DINET
@@ -27,13 +26,15 @@ ifeq ($(INET6),1)
 	CFLAGS+= -DINET6
 endif
 
-.PHONY: run-server clean make-dir
+.PHONY: run-server build-server clean make-dir all
 
 all: $(SERVER)
 
 run-server: $(SERVER)
 	@clear
 	$(SERVER) $(IP) $(PORT) $(DIR)
+
+build-server: $(SERVER)
 
 $(SERVER): $(OBJ) | make-dir
 	$(CC) -o $@ $^ 
