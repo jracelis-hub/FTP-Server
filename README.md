@@ -142,7 +142,7 @@ When either using either options 2 more directories get create:
 - `obj` - holds the object files per source files when compiling
 
 Option 1:
-```
+```shell
 # To build or build && run do the following
 make run-server INET=1 
 # This runs the default IPv4 IP=127.0.0.1 PORT=2121 MNT=$HOME
@@ -154,7 +154,7 @@ make build-server INET=1
 ```
 
 Option 2:
-```
+```shell
 # As prompted just choose the following output when running 
 ./make-options.sh
 Choose the following options to build or build and connect:
@@ -169,11 +169,11 @@ Choose the following options to build or build and connect:
 #?
 ```
 
-Option 2 sample demo:
+**Sample demo**:
 ![build](videos/demo.gif)
 
 Directory Layout:
-```bash
+```shell
 ├── client-src
 │   ├── Makefile
 │   ├── client.c
