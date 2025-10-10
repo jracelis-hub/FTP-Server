@@ -10,6 +10,9 @@
 	- [Command Process](#command-process-overview)
 	- [Memory Layout](#memory-layout)
 - [Requirements](#requirements)
+- [How To](#how-to)
+	- [Build](#build)
+	- [Run](#run)
 - [Testing](#testing)
 		
 ## Features
@@ -109,6 +112,24 @@ The command process has 5 key components:
 
 ## Requirements
 
+Tested on the following versions:
+- GCC `gcc 13.3.0`
+- Make `gnu make 4.3`
+- Git `git version 2.43.0`
+- WSL (Optional) `WSL version: 2.5.9.0`
+- Ubuntu (Optional) `ubuntu version 24.04.3 LTS`
+
+> [!IMPORTANT]
+> The following testing was conducted in a Linux environment. With the usage of `pthreads` POSIX threads. To have the best results use WSL, Ubuntu or Raspbian (RPi OS). 
+
+If not in a Linux environment go to [environment setup](Environment-Setup.md).
+
+## How To
+
+### Build
+
+![build](video/build_example.gif)
+
 Directory Layout:
 ```bash
 ├── client-src
@@ -156,10 +177,7 @@ Directory Layout:
         └── thread.o
 ```
 
-> [!IMPORTANT]
-> The following testing was conducted in a Linux environment. With the usage of `pthreads` POSIX threads. To have the best results use WSL, Ubuntu or Raspbian (RPi OS). 
-
-If not in a Linux environment go to [environment setup](Environment-Setup.md).
+### Run
 
 ## Testing
 
