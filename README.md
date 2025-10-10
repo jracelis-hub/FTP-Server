@@ -110,23 +110,23 @@ The command process has 5 key components:
 ## Requirements
 
 Directory Layout:
-```
+```bash
 ├── client-src
 │   ├── Makefile
-│   ├── build
-│   │   └── client
 │   ├── client.c
 │   ├── commands-client.c
 │   ├── logging.c
 │   ├── main.c
-│   ├── obj
-│   │   ├── client.o
-│   │   ├── commands-client.o
-│   │   ├── logging.o
-│   │   ├── main.o
-│   │   └── parsing.o
 │   ├── parsing.c
-│   └── run-default.sh
+│   ├── run-default.sh
+│   ├── build
+│   │   └── client
+│   └── obj
+│       ├── client.o
+│       ├── commands-client.o
+│       ├── logging.o
+│       ├── main.o
+│       └── parsing.o
 ├── include
 │   ├── client.h
 │   ├── command_type.h
@@ -138,22 +138,22 @@ Directory Layout:
 │   └── thread.h
 └── server-src
     ├── Makefile
-    ├── build
-    │   └── server
     ├── commands-thread.c
     ├── logging.c
     ├── main.c
-    ├── obj
-    │   ├── commands-thread.o
-    │   ├── logging.o
-    │   ├── main.o
-    │   ├── parsing.o
-    │   ├── server.o
-    │   └── thread.o
     ├── parsing.c
     ├── run-default.sh
     ├── server.c
-    └── thread.c
+    ├── thread.c
+    ├── build
+    │   └── server
+    └── obj
+        ├── commands-thread.o
+        ├── logging.o
+        ├── main.o
+        ├── parsing.o
+        ├── server.o
+        └── thread.o
 ```
 
 > [!IMPORTANT]

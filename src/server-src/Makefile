@@ -45,4 +45,4 @@ make-dir:
 	@mkdir -p $(BUILD_DIR) $(OBJ_DIR)
 
 clean: 
-	rm -r $(OBJ_DIR) $(BUILD_DIR) $(SERVER)
+	rm -r $(OBJ_DIR) $(BUILD_DIR)
