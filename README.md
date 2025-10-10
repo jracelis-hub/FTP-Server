@@ -128,7 +128,7 @@ If not in a Linux environment go to [environment setup](Environment-Setup.md).
 
 ### Build
 
-![build](videos/build_example.gif)
+![build](videos/demo.gif)
 
 Directory Layout:
 ```bash
