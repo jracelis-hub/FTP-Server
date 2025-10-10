@@ -128,6 +128,48 @@ If not in a Linux environment go to [environment setup](Environment-Setup.md).
 
 ### Build
 
+The build directory consists of 3 main directories:
+- server source code
+- client source code
+- header files
+
+When compiling there are two ways to compile:
+1. Manual running `make`
+2. Using `./make-options.sh`
+
+When either using either options 2 more directories get create:
+- `build` - holds the executable to run
+- `obj` - holds the object files per source files when compiling
+
+Option 1:
+```
+# To build or build && run do the following
+make run-server INET=1 
+# This runs the default IPv4 IP=127.0.0.1 PORT=2121 MNT=$HOME
+make run-client INET=1
+# This runs the default IPv4 IP=127.0.0.1 PORT=2121
+
+# Or just build and run it via ./build/server
+make build-server INET=1 
+```
+
+Option 2:
+```
+# As prompted just choose the following output when running 
+./make-options.sh
+Choose the following options to build or build and connect:
+----------------------------------------------------------------------
+6 to exit
+1) run_local_server
+2) run_local6_server
+3) run_ipv4_server
+4) build_server
+5) build_server6
+6) exit_menu
+#?
+```
+
+Option 2 sample demo:
 ![build](videos/demo.gif)
 
 Directory Layout:
@@ -138,8 +180,8 @@ Directory Layout:
 │   ├── commands-client.c
 │   ├── logging.c
 │   ├── main.c
+│   ├── make-options.sh
 │   ├── parsing.c
-│   ├── run-default.sh
 │   ├── build
 │   │   └── client
 │   └── obj
@@ -162,8 +204,8 @@ Directory Layout:
     ├── commands-thread.c
     ├── logging.c
     ├── main.c
+    ├── make-options.sh
     ├── parsing.c
-    ├── run-default.sh
     ├── server.c
     ├── thread.c
     ├── build
