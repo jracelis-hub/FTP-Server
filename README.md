@@ -114,6 +114,7 @@ The command process has 5 key components:
 
 <p align="center">
 	<img src="./images/request_diagram.png" title="Command Format">
+	<br></br>
 	<b>Figure 3</b>: Command Format
 </p>
 
@@ -275,9 +276,9 @@ make run-client INET=1
 <details>
 <summary><b>Raspberry Pi Run Demo</b></summary>
 <br></br>
-<p align="center">
-	<img src="videos/rpi_run_demo.gif" title="RPi Demo">	
-</p>
+	<p align="center">
+		<img src="videos/rpi_run_demo.gif" title="RPi Demo">	
+	</p>
 
 ---
 </details>
