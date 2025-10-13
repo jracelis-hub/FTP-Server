@@ -1,4 +1,4 @@
-## Environment Setup
+# Environment Setup
 
 - [WSL](#wsl)
 - [Virtual Machine](#virtual-machine)
@@ -31,11 +31,11 @@ Windows version: 10.0.26100.4946
 
 Run the following script [update-system.sh](setup-scripts/update-system.sh) to make sure system is up to date.
 ```bash
-cd setup-scripts && chmod +x update-system.sh && ./update-system.sh
+cd FTP-Server/setup-scripts && chmod +x update-system.sh && ./update-system.sh
 ```
 Or
 ```bash
-cd setup-scripts && bash update-system.sh
+cd FTP-Server/setup-scripts && bash update-system.sh
 ```
 
 ### Virtual Machine
@@ -69,7 +69,7 @@ Hit finish
 From there boot up the system.
 
 Once booted up in the termial do the following:
-```
+```bash
 git clone https://github.com/jracelis-hub/FTP-Server.git
 ```
 Run the following script [update-system.sh](setup-scripts/update-system.sh) to make sure system is up to date.
@@ -165,13 +165,14 @@ Plug the micro SD card into computer and walk through the RPi Imager software
 
 Once everything is set up and flashed. Plug in micro SD card and power on RPi.
 
-The system should be in the network.
+The RPi should show up on the network after a couple of minutes.
 
-To find the RPi on the network I use the command line utility `nmap`. To scan 
+To find the RPi on the network I use the command line utility `nmap`. To scan my subnet mask.
 
-To check if it is install type `nmap -v` to see the version. 
+> [!WARNING]
+> Only do `nmap` in a network that is allowed to be perfomed on, `nmap` can raise security risks when under a network that is not your own.
 
-Example:
+To check if it is install type `nmap -v` to see the version:
 ```bash
 Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-08-25 09:40 PDT
 Read data files from: /usr/bin/../share/nmap
@@ -186,7 +187,7 @@ Nmap done: 0 IP addresses (0 hosts up) scanned in 0.01 seconds
 sudo apt install nmap -y
 ```
 
-Once everything is installed run the following to find which devices have port 22 (_ssh_) opened on the network
+Once everything is installed run the following to find which devices have port 22 (_ssh_) opened on the network.
 ```bash
 nmap -p 22 192.168.0.1/24 | grep -B 4 open
 ```
@@ -211,17 +212,27 @@ Host is up (0.021s latency).
 PORT   STATE SERVICE
 22/tcp open  ssh
 ```
-
 Since, my network DHCP server range is only from 192.168.0.2 - 192.168.0.200. I can determine which device was recently added to my _LAN_. 
 
-> [!WARNING]
 > I did this through changing the DHCP settings on my COX router/moderm via app, procedure may vary.
 
+Now get the repository on the RPi
+```bash
+git clone https://github.com/jracelis-hub/FTP-Server.git
+```
+
 From there I ssh into to the Pi to get my system all setup. Running the following [update-system.sh](setup-scripts/update-system.sh).
+```bash
+cd FTP-Server/setup-scripts && chmod +x update-system.sh && ./update-system.sh
+```
+
+or
+
+```bash
+cd FTP-Server/setup-scripts/ && bash update-system.sh
+```
 
 And to set up a static IP using [setup-static-ip.sh](setup-scripts/update-system.sh)
-
-Sample:
 ```bash
 pifive@raspberrypi:~ $ chmod +x manual-ip.sh && ./manual-ip.sh
 Beginning manual configuration...
@@ -242,6 +253,12 @@ Changing ipv4.method to manual...
 done
 Resetting network...
 ```
+From there the RPi will boot up and ssh back in with the new IP address.
 
-From there the RPi will boot up and ssh back in 
+To check that it has changed run:
+```bash
+hostname -I | grep -oE '[0-9]{2,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
+# This should show new IP address
+192.168.0.251
+```
 
