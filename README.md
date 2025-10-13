@@ -141,46 +141,16 @@ The build directory consists of 3 main directories:
 - client source code
 - header files
 
-When compiling there are two ways to compile:
-1. Manual running `make`
-2. Using `./make-options.sh`
+> See drop down directory overview
 
-When either using either options 2 more directories get create:
-- `build` - holds the executable to run
-- `obj` - holds the object files per source files when compiling
+<details>
+<summary><b>Directory Layout</b></summary>
 
-Option 1:
-```shell
-# To build or build && run do the following
-make run-server INET=1 
-# This runs the default IPv4 IP=127.0.0.1 PORT=2121 MNT=$HOME
-make run-client INET=1
-# This runs the default IPv4 IP=127.0.0.1 PORT=2121
+The 3 directories:
+- `client-src` - holds the source code to for the client side that connects to the server
+- `server-src` - holds the source code to run the server on the machine of choice
+- `include` - holds the header files of both `client-src` and `server-src`
 
-# Or just build and run it via ./build/server
-make build-server INET=1 
-```
-
-Option 2:
-```shell
-# As prompted just choose the following output when running 
-./make-options.sh
-Choose the following options to build or build and connect:
-----------------------------------------------------------------------
-6 to exit
-1) run_local_server
-2) run_local6_server
-3) run_ipv4_server
-4) build_server
-5) build_server6
-6) exit_menu
-#?
-```
-
-**Sample demo**:
-![build](videos/demo.gif)
-
-Directory Layout:
 ```shell
 ├── client-src
 │   ├── Makefile
@@ -226,6 +196,47 @@ Directory Layout:
         ├── server.o
         └── thread.o
 ```
+---
+</details>
+
+When compiling there are two ways to compile:
+1. Manual running `make`
+2. Using `./make-options.sh`
+
+When either using either options 2 more directories get create:
+- `build` - holds the executable to run
+- `obj` - holds the object files per source files when compiling
+
+Option 1:
+```shell
+# To build or build && run do the following
+make run-server INET=1 
+# This runs the default IPv4 IP=127.0.0.1 PORT=2121 MNT=$HOME
+make run-client INET=1
+# This runs the default IPv4 IP=127.0.0.1 PORT=2121
+
+# Or just build and run it via ./build/server
+make build-server INET=1 
+```
+
+Option 2:
+```shell
+# As prompted just choose the following output when running 
+./make-options.sh
+Choose the following options to build or build and connect:
+----------------------------------------------------------------------
+6 to exit
+1) run_local_server
+2) run_local6_server
+3) run_ipv4_server
+4) build_server
+5) build_server6
+6) exit_menu
+#?
+```
+
+**Sample demo**:
+![build](videos/demo.gif)
 
 ### Run
 

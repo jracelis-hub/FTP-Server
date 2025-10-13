@@ -22,15 +22,19 @@ void usage(char *program)
 
 void perform_msg(const char *message)
 {
-	fprintf(stderr, "       File: %s\n", __FILE__);
-	fprintf(stderr, "   Function: %s\n", __func__);
-	fprintf(stderr, "       Line: %d\n", __LINE__);
 	fprintf(stderr, "Description: %s\n", message);
 }
 
-void error_msg(const char *message) 
+void _error_msg(const char *file, const char *function,
+                int line, const char *message) 
 {
-	fprintf(stderr, "%s\n",message);
+	const char *status = "Error";
+	
+	fprintf(stderr, "     Status: %s\n", status);
+	fprintf(stderr, "       File: %s\n", file);
+	fprintf(stderr, "   Function: %s\n", function);
+	fprintf(stderr, "       Line: %d\n", line);
+	fprintf(stderr, "Description: %s\n", message);
 }
 
 void pass_msg(void) {

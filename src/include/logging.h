@@ -21,7 +21,10 @@
 void usage(char *program);
 
 /* logging for error message and performing a task */
-void error_msg(const char *message);
+void _error_msg(const char *file, const char *function, 
+               int line, const char *message);
+#define error_msg(message) _error_msg(__FILE__, __func__, __LINE__, message)
+
 void perform_msg(const char *message);
 void pass_msg(void);
 

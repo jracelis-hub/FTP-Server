@@ -13,7 +13,6 @@ NET_NAME="$(nmcli c show | awk '/wlan0/ {print $1}')"
 get_ip() 
 {
         echo -en "${YELLOW}Enter IPv4 address:${RESET} "
-		# Values are preset use arrow keys to change value
         read -e -i "192.168.0.xxx/24" IP
 }
 
@@ -68,6 +67,7 @@ reset_connection()
 verbose_mode() 
 {
         echo -e "${YELLOW}Beginning manual configuration...${RESET}"
+        echo -e "${RED}Use the arrow keys to change the values!${RESET}"
         get_ip
         get_gateway
         get_dns

@@ -123,7 +123,6 @@ void *thread_handle_client(void *args)
 
 		if (command_handler(&thread_handle) < 0) 
 		{
-			error_msg("Could not perform command properly");
 			break;
 		}
 

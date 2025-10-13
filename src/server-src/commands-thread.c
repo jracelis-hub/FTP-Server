@@ -35,26 +35,44 @@ int command_handler(thread_handler_t *thread_handle)
 	{
 		case DOWNLOAD:
 			if (command_handle_download(thread_handle) < 0 ) 
-			{ return ERROR_COMMAND; }
+			{ 
+				error_msg("Could not perform download properly");
+				return ERROR_COMMAND; 
+			}
 			break;
 		case UPLOAD:
 			if (command_handle_upload(thread_handle) < 0 ) 
-			{ return ERROR_COMMAND; }
+			{ 
+				error_msg("Could not perform upload properly");
+				return ERROR_COMMAND; 
+				}
 			break;
 		case LIST:
 			if (command_handle_list(thread_handle) < 0) 
-			{ return ERROR_COMMAND; }
+			{ 
+				error_msg("Could not perform list properly");
+				return ERROR_COMMAND; 
+			}
 			break;
 		case READ:
 			if (command_handle_read(thread_handle) < 0) 
-			{ return ERROR_COMMAND; }
+			{ 
+				error_msg("Could not perform read properly");
+				return ERROR_COMMAND; 
+			}
 			break;
 		case INVALID:
 			command_handle_invalid(thread_handle);
-			return ERROR_COMMAND;
+			{
+				error_msg("Could not perform command properly");
+				return ERROR_COMMAND;
+			}
 		default:
 			command_handle_invalid(thread_handle);
-			return ERROR_COMMAND;
+			{
+				error_msg("Could not perform command properly");
+				return ERROR_COMMAND;
+			}
 	}
 	return SUCCESS;
 }
