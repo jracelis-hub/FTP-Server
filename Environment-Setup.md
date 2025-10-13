@@ -261,4 +261,3 @@ hostname -I | grep -oE '[0-9]{2,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
 # This should show new IP address
 192.168.0.251
 ```
-

@@ -116,6 +116,7 @@ The command process has 5 key components:
 	<img src="./images/request_diagram.png" title="Command Format">
 	<b>Figure 3</b>: Command Format
 </p>
+
 ### Memory Layout
 
 ## Requirements
@@ -265,7 +266,7 @@ make run-client INET=1
 <summary><b>Local Run demo</br></summary>
 <br></br>
 	<p align="center">
-		<img src="videos/demo.gif" title="Local Run Demo">
+		<img src="videos/local_run_demo.gif" title="Local Run Demo">
 	</p>
 
 ---
@@ -275,7 +276,7 @@ make run-client INET=1
 <summary><b>Raspberry Pi Run Demo</b></summary>
 <br></br>
 <p align="center">
-	<img src="videos/RPi_run_demo.gif" title="RPi Demo">	
+	<img src="videos/rpi_run_demo.gif" title="RPi Demo">	
 </p>
 
 ---
