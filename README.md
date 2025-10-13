@@ -255,13 +255,64 @@ Choose the following options to build or build and connect:
 
 ### Run
 
+Server:
+
+The `./server` takes 3 arguments:
+1. IPv4 or IPv6 address that will be hosting the server.
+2. Port that the server will be listening on.
+3. Mounted directory that the server will be available for the client to use.
+
+When running exectuable in wrong order or incorrect arguments `usage()` will pop up on proper parameters. See [Error Logging](#error-logging) for output.
+
 ```shell
-# To build or build && run do the following
+# Home is /home/user_directory. The directory can be any directory
+cd build && ./server 127.0.0.1 2121 $HOME
+```
+
+To use the automated version use `make-options.sh` and choose the following `1-3` choices as seen above.
+1. `run_local_server` - binds to IPv4 127.0.0.1 on port 2121
+2. `run_local6_server` - binds to IPv6 ::1 on port 2121
+3. `run_ipv4_server` - uses `hostname -I` to grab IPv4 (192.168.0.xxx) address on port 2121
+
+> IPv4 `hostname -I` is different per machine
+
+```shell
+# Build && run do the following
 make run-server INET=1 
 # This runs the default IPv4 IP=127.0.0.1 PORT=2121 MNT=$HOME
-make run-client INET=1
-# This runs the default IPv4 IP=127.0.0.1 PORT=2121
 ```
+
+Client:
+
+Like the server, the client takes similar arguments but instead of hosting, the client is trying to connect to the server interface.
+
+The `./client` takes 2 arguments:
+1. IPv4 or IPv6 address the server is hosting on that the client wants to connect to.
+2. Port that the server is listening on for the client to connect.
+
+```shell
+# This is for connecting onto the local address
+cd build && ./client 127.0.0.1 2121
+```
+
+To use the automated version use `make-options.sh` and choose the following `1-3` choices:
+1. `connect_local_server` - connect to IPv4 127.0.0.1 on port 2121
+2. `connect_local6_server` - connect to IPv6 ::1 on port 2121
+3. `connect_network_server` - connect to IPv4 network address 
+
+> Using option 3 needs an argument passed in before running `make-options.sh`
+
+```shell
+./make-options.sh 192.168.0.251
+```
+
+The manual operation using `make` to build and run the script with the following preset parameters:
+```shell
+# This runs the default IPv4 IP=127.0.0.1 PORT=2121
+make run-client INET=1
+```
+
+> See the drop down for a demo on how to use.
 
 <details>
 <summary><b>Local Run demo</br></summary>
@@ -284,3 +335,37 @@ make run-client INET=1
 </details>
 
 ## Testing
+
+### Error Logging 
+
+All error logging is found in the header `logging.h` using `_error_msg()` and `usage()` to capture error codes and improper usage.
+
+`usage()` shows usage message and an example how to use.
+```bash
+~/dev/FTP-Server/src/client-src/build $ ./client 2121
+----------------------------------------
+  Usage: ./client [IPv4] [Port].
+Example: ./client 192.168.0.xxx 8000.
+   Note: Port has to be 1023 > port < 65535. See /etc/protocols.
+----------------------------------------
+```
+
+`_error_msg()` contains information on:
+- File - the file in which it failed in
+- Function - the function that it failed in
+- Line - the line the `_error_msg()` occured in
+- Description - a description of the error
+
+```bash
+~/dev/FTP-Server/src/client-src $ ./build/client 2600:8802:2f8c:6c00:4e63:5e1:19cf:5848 2121
+Creating socket...
+-----------------------------------> Done
+Attempting to connect to server...
+     Status: Error
+       File: main.c
+   Function: main
+       Line: 53
+Description: Could not connect to server
+```
+
+### Command
