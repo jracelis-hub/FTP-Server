@@ -47,7 +47,10 @@ For handling multiple connections, I went with `pthreads` (POSIX threads). Since
 
 Although encryption is essential when sending data over the internet for security and privacy, this program will not include it as the transfers be within my _LAN_ (local area network).
 
-![program flow](images/flow_chart.png "Program Flow Chart")
+<p align="center">
+	<img src="images/flow_chart.png" title="Program Flow Chart">
+	<b>Figure 1</b>: Design Flow
+</p>
 
 The FTP (File Transfer Protocol) concepts and details utilized for this project is found in [RFC 959](https://datatracker.ietf.org/doc/html/rfc959#ref-1). 
 
@@ -95,7 +98,10 @@ Using the base set of rules and structure, the flow consists of the **Data Trans
 
 ### Architecture Overview
 
-![ftp architecture](images/ftp_architecture.png "FTP Architecture")
+<p align="center">
+	<img src="./images/ftp_architecture.png" title="FTP Architecture">
+	<b>Figure 2</b>: FTP Architecture
+</p>
 
 ### Command Process
 
@@ -106,8 +112,10 @@ The command process has 5 key components:
 4. **File** - the file or the file path that the server conducts the data transfer process on.
 5. **Payload** - the payload is the data that is being transfer to `upload` onto the server.
 
-![request flow](images/request_diagram.png "Request Format")
-
+<p align="center">
+	<img src="./images/request_diagram.png" title="Command Format">
+	<b>Figure 3</b>: Command Format
+</p>
 ### Memory Layout
 
 ## Requirements

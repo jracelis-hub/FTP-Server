@@ -20,7 +20,10 @@ void usage(char *program)
 
 void error_msg(const char *message)
 {
-	fprintf(stderr,"%s\n",message);
+	fprintf(stderr, "       File: %s\n", __FILE__);
+	fprintf(stderr, "   Function: %s\n", __func__);
+	fprintf(stderr, "       Line: %d\n", __LINE__);
+	fprintf(stderr, "Description: %s\n", message);
 }
 
 void perform_msg(const char *message)

@@ -22,7 +22,10 @@ void usage(char *program)
 
 void perform_msg(const char *message)
 {
-	printf("%s\n", message);
+	fprintf(stderr, "       File: %s\n", __FILE__);
+	fprintf(stderr, "   Function: %s\n", __func__);
+	fprintf(stderr, "       Line: %d\n", __LINE__);
+	fprintf(stderr, "Description: %s\n", message);
 }
 
 void error_msg(const char *message) 
