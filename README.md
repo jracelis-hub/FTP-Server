@@ -146,43 +146,47 @@ The build directory consists of 3 main directories:
 <details>
 <summary><b>Directory Layout</b></summary>
 
-The 3 directories:
+Directories Layout:
 - `client-src` - holds the source code to for the client side that connects to the server
 - `server-src` - holds the source code to run the server on the machine of choice
 - `include` - holds the header files of both `client-src` and `server-src`
 
+After building the following 2 directories get created:
+- `build` - holds the executable to run
+- `obj` - holds the object files per source files when compiling
+
 ```shell
-├── client-src
-│   ├── Makefile
-│   ├── client.c
-│   ├── commands-client.c
-│   ├── logging.c
-│   ├── main.c
-│   ├── make-options.sh
-│   ├── parsing.c
+├── client-src    <--------------  client directory
+│   ├── Makefile  <--------------  make file
+│   ├── make-options.sh   <------  bash script 
+│   ├── client.c          <------
+│   ├── commands-client.c       |
+│   ├── logging.c               |  src files
+│   ├── main.c                  |
+│   ├── parsing.c         <------
 │   ├── build
-│   │   └── client
+│   │   └── client  <------------- executable 
 │   └── obj
-│       ├── client.o
-│       ├── commands-client.o
-│       ├── logging.o
-│       ├── main.o
-│       └── parsing.o
-├── include
-│   ├── client.h
-│   ├── command_type.h
-│   ├── commands-client.h
-│   ├── commands-thread.h
-│   ├── logging.h
-│   ├── parsing.h
-│   ├── server.h
-│   └── thread.h
+│       ├── client.o          <---
+│       ├── commands-client.o    |
+│       ├── logging.o            | object files
+│       ├── main.o               |
+│       └── parsing.o         <---
+├── include   <------------------- header directory
+│   ├── client.h          <-------
+│   ├── command_type.h           |
+│   ├── commands-client.h        |
+│   ├── commands-thread.h        | header files
+│   ├── logging.h                |
+│   ├── parsing.h                |
+│   ├── server.h                 |
+│   └── thread.h          <-------
 └── server-src
     ├── Makefile
+    ├── make-options.sh
     ├── commands-thread.c
     ├── logging.c
     ├── main.c
-    ├── make-options.sh
     ├── parsing.c
     ├── server.c
     ├── thread.c
@@ -196,6 +200,7 @@ The 3 directories:
         ├── server.o
         └── thread.o
 ```
+
 ---
 </details>
 
@@ -203,23 +208,34 @@ When compiling there are two ways to compile:
 1. Manual running `make`
 2. Using `./make-options.sh`
 
-When either using either options 2 more directories get create:
-- `build` - holds the executable to run
-- `obj` - holds the object files per source files when compiling
+**Option 1**
 
-Option 1:
+Use the following `make` arguments to build:
+- `make build-server INET=1` - to build IPv4 server executeable (verbose)
+- `make build-server INET6=1` - to build IPv6 server executable (verbose)
+- `make INET=1` - to build IPv4 server exectuable
+- `make INET6=1` - to build IPv6 server executable
+
 ```shell
-# To build or build && run do the following
-make run-server INET=1 
-# This runs the default IPv4 IP=127.0.0.1 PORT=2121 MNT=$HOME
-make run-client INET=1
-# This runs the default IPv4 IP=127.0.0.1 PORT=2121
-
-# Or just build and run it via ./build/server
+# Creates executable in ./build and run it via ./build/server
 make build-server INET=1 
+# Making a IPv6 server
+make build-server INET6=1
+# Less verbose IPv4
+make INET=1 
+# Less verbose IPv6
+make INET6=1 
 ```
 
-Option 2:
+**Option 2**
+
+Run the following shell script `./make-options.sh`
+- `4) build_server` - to build IPv4 server exectuable
+- `5) build_server6` - to build IPv6 server exectuable
+
+> [!NOTE]
+> I am not mentioning `1-3` as that is an automated way to build and run, this will be shown in [How To Run](#run) section.
+
 ```shell
 # As prompted just choose the following output when running 
 ./make-options.sh
@@ -232,13 +248,37 @@ Choose the following options to build or build and connect:
 4) build_server
 5) build_server6
 6) exit_menu
-#?
+#? 4 
 ```
-
-**Sample demo**:
-![build](videos/demo.gif)
 
 ### Run
 
-## Testing
+```shell
+# To build or build && run do the following
+make run-server INET=1 
+# This runs the default IPv4 IP=127.0.0.1 PORT=2121 MNT=$HOME
+make run-client INET=1
+# This runs the default IPv4 IP=127.0.0.1 PORT=2121
+```
 
+<details>
+<summary><b>Local Run demo</br></summary>
+<br></br>
+	<p align="center">
+		<img src="videos/demo.gif" title="Local Run Demo">
+	</p>
+
+---
+</details>
+
+<details>
+<summary><b>Raspberry Pi Run Demo</b></summary>
+<br></br>
+<p align="center">
+	<img src="videos/RPi_run_demo.gif" title="RPi Demo">	
+</p>
+
+---
+</details>
+
+## Testing
