@@ -10,6 +10,7 @@ A simple, threaded FTP-like server written in C using POSIX sockets. Supports IP
 	- [Architecture Overview](#architecture-overview)
 	- [Command Process](#command-process)
 	- [Memory Layout](#memory-layout)
+	- [Logging](#logging)
 - [Requirements](#requirements)
 - [Getting Started](#getting-started)
 	- [Build](#build)
