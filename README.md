@@ -123,6 +123,40 @@ The command process has 5 key components:
 
 ### Memory Layout
 
+### Logging
+
+Error Logging 
+
+All error logging is found in the header `logging.h` using `_error_msg()` and `usage()` to capture error codes and improper usage.
+
+`usage()` shows usage message and an example how to use.
+```bash
+~/dev/FTP-Server/src/client-src/build $ ./client 2121
+----------------------------------------
+  Usage: ./client [IPv4] [Port].
+Example: ./client 192.168.0.xxx 8000.
+   Note: Port has to be 1023 > port < 65535. See /etc/protocols.
+----------------------------------------
+```
+
+`_error_msg()` contains information on:
+- File - the file in which it failed in
+- Function - the function that it failed in
+- Line - the line the `_error_msg()` occured in
+- Description - a description of the error
+
+```bash
+~/dev/FTP-Server/src/client-src $ ./build/client 2600:8802:2f8c:6c00:4e63:5e1:19cf:5848 2121
+Creating socket...
+-----------------------------------> Done
+Attempting to connect to server...
+     Status: Error
+       File: main.c
+   Function: main
+       Line: 53
+Description: Could not connect to server
+```
+
 ## Requirements
 
 Tested on the following versions:
@@ -339,36 +373,5 @@ make run-client INET=1
 
 ## Testing
 
-### Error Logging 
-
-All error logging is found in the header `logging.h` using `_error_msg()` and `usage()` to capture error codes and improper usage.
-
-`usage()` shows usage message and an example how to use.
-```bash
-~/dev/FTP-Server/src/client-src/build $ ./client 2121
-----------------------------------------
-  Usage: ./client [IPv4] [Port].
-Example: ./client 192.168.0.xxx 8000.
-   Note: Port has to be 1023 > port < 65535. See /etc/protocols.
-----------------------------------------
-```
-
-`_error_msg()` contains information on:
-- File - the file in which it failed in
-- Function - the function that it failed in
-- Line - the line the `_error_msg()` occured in
-- Description - a description of the error
-
-```bash
-~/dev/FTP-Server/src/client-src $ ./build/client 2600:8802:2f8c:6c00:4e63:5e1:19cf:5848 2121
-Creating socket...
------------------------------------> Done
-Attempting to connect to server...
-     Status: Error
-       File: main.c
-   Function: main
-       Line: 53
-Description: Could not connect to server
-```
 
 ### Command
