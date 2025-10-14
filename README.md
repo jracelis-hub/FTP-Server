@@ -1,54 +1,56 @@
 # FTP Server
 
-> [!CAUTION]
-> Working In Progress
+A simple, threaded FTP-like server written in C using POSIX sockets. Supports IPv4/IPv6, concurrent clients (with threads), basic commands (List, Read, Download, Upload), and logging.
+
+---
 
 - [Features](#features)
-- [Overview](#overview)
-- [Design Philosophy](#design-philosophy)
-	- [Architecture Overview](#command-process-overview)
-	- [Command Process](#command-process-overview)
+- [Design & Architecture](#design-&-architecture)
+	- [Design Overview](#design-overview)
+	- [Architecture Overview](#architecture-overview)
+	- [Command Process](#command-process)
 	- [Memory Layout](#memory-layout)
 - [Requirements](#requirements)
-- [How To](#how-to)
+- [Getting Started](#getting-started)
 	- [Build](#build)
 	- [Run](#run)
 - [Testing](#testing)
 		
 ## Features
 
-Haves
-- [x] Multi-threaded 
-- [x] TCP with IPv4 or IPv6 Support
-- [x] Command Line Interface
-- [x] File Transfer (text)
-- [x] Half-Duplex
-- [x] Server <-> Client Model
+Network Stack
+- [x] IPv4 or IPv6 Support
+- [x] TCP 
+- [x] FTP-Like
+
+Concurrency/Parallelism
+- [x] Multi-threaded (pthreads)
+
+Architecture
 - [x] POSIX Compliant
+- [x] Server <-> Client Model
+- [x] Half-Duplex
+- [x] Command parsing and dispatch (List; Read; Upload; Download;) 
+
+Data Transfer
+- [x] File Transfer (text)
 - [x] File Transfer Size 4 KiB
 
-Wants
-- [ ] Windows
-- [ ] Encryption
+## Design & Architecture
 
-## Overview
+### Design Overview
 
-I found myself working between different devices under my network. I currently have my desktop and two Raspbery Pis that I tend to transfer different files from one play to another via using `scp`. 
-
-With this project, I wanted to challenge myself in learning networking programming on a lower level. While there are many protocols and services to transfer files from one device to another `scp` `ftp` `ftps`... etc. I thought this would be a great learning experience to create my own file transfer program in C.
-
-## Design Philosophy
-
-Since I have been working with Unix based systems, I wanted to design this program to be POSIX (Portable Operating System Interface) compliant.
+The design of the API is to be POSIX (Portable Operating System Interface) compliant.
 
 The network stack, consist of using `TCP`, that supports either `IPv6` or `IPv4`. The purpose of using `TCP` is to ensure data is transfer over the network consistly and reliablily over the network.
 
-For handling multiple connections, I went with `pthreads` (POSIX threads). Since, the amount requests client devices is less than 10 on my private network. There are altnative approaches using event based APIs like `select()` or `poll()` for a more scalable approach.
+For handling multiple connections, `pthreads` was the go to answer (POSIX threads), since the amount requests client devices is assumed to be less than 10. There are alternative approaches using event based APIs like `select()` or `poll()` for a more scalable approach.
 
-Although encryption is essential when sending data over the internet for security and privacy, this program will not include it as the transfers be within my _LAN_ (local area network).
+Although encryption is essential when sending data over the internet for security and privacy, API will not include it as the transfers be within a _LAN_ (local area network).
 
 <p align="center">
 	<img src="images/flow_chart.png" title="Program Flow Chart">
+	<br></br>
 	<b>Figure 1</b>: Design Flow
 </p>
 
@@ -78,19 +80,19 @@ Using the base set of rules and structure, the flow consists of the **Data Trans
 			<th>Description</th>
 		</tr>
 		<tr>	
-			<td>Upload</td>
+			<td>Upload;</td>
 			<td>to upload a file onto the server</td>
 		</tr>	
 		<tr>	
-			<td>Download</td>
+			<td>Download;</td>
 			<td>to download a file from the server to local</td>
 		</tr>	
 		<tr>	
-			<td>List</td>
+			<td>List;</td>
 			<td>to all the files mounted directory on the server</td>
 		</tr>	
 		<tr>	
-			<td>Read</td>
+			<td>Read;</td>
 			<td>to read the information of a file from the server</td>
 		</tr>	
 	</tbody>
@@ -100,6 +102,7 @@ Using the base set of rules and structure, the flow consists of the **Data Trans
 
 <p align="center">
 	<img src="./images/ftp_architecture.png" title="FTP Architecture">
+	<br></br>
 	<b>Figure 2</b>: FTP Architecture
 </p>
 
@@ -134,11 +137,11 @@ Tested on the following versions:
 
 If not in a Linux environment go to [environment setup](Environment-Setup.md).
 
-## How To
+## Getting Started
 
 ### Build
 
-The build directory consists of 3 main directories:
+The build directories:
 - server source code
 - client source code
 - header files
@@ -149,13 +152,13 @@ The build directory consists of 3 main directories:
 <summary><b>Directory Layout</b></summary>
 
 Directories Layout:
-- `client-src` - holds the source code to for the client side that connects to the server
-- `server-src` - holds the source code to run the server on the machine of choice
+- `client-src` - holds client source code 
+- `server-src` - holds server source code 
 - `include` - holds the header files of both `client-src` and `server-src`
 
 After building the following 2 directories get created:
 - `build` - holds the executable to run
-- `obj` - holds the object files per source files when compiling
+- `obj` - holds the object files per source files
 
 ```shell
 ├── client-src    <--------------  client directory
@@ -236,7 +239,7 @@ Run the following shell script `./make-options.sh`
 - `5) build_server6` - to build IPv6 server exectuable
 
 > [!NOTE]
-> I am not mentioning `1-3` as that is an automated way to build and run, this will be shown in [How To Run](#run) section.
+> I am not mentioning `1-3` as that is an automated way to build and run, this will be shown in [run](#run) section.
 
 ```shell
 # As prompted just choose the following output when running 
