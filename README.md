@@ -374,5 +374,275 @@ make run-client INET=1
 
 ## Testing
 
+The API was mainly tested over IPv4 using network transfers and local transfers:
+- `192.168.0.xxx`
+- `127.0.0.1`
+
+To have a contained environment with limited resources, I utilized a Raspberry Pi with a CPU of 4 cores to simulate thread parallelism and 4GiB of RAM. But testing also occur untilizing local IP `127.0.0.1`
+
+<details>
+<summary>Raspberry Pi Hardware</summary>
+
+RAM:
+```bash
+server@raspberrypi:/proc $ free
+               total        used        free      shared  buff/cache   available
+Mem:         4147648      246192     2368336       13440     1619936     3901456
+Swap:         524272           0      524272
+```
+
+CPU Cores:
+```bash
+server@raspberrypi:~ $ cat /proc/cpuinfo
+processor       : 0
+BogoMIPS        : 108.00
+Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+CPU implementer : 0x41
+CPU architecture: 8
+CPU variant     : 0x4
+CPU part        : 0xd0b
+CPU revision    : 1
+
+processor       : 1
+BogoMIPS        : 108.00
+Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+CPU implementer : 0x41
+CPU architecture: 8
+CPU variant     : 0x4
+CPU part        : 0xd0b
+CPU revision    : 1
+
+processor       : 2
+BogoMIPS        : 108.00
+Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+CPU implementer : 0x41
+CPU architecture: 8
+CPU variant     : 0x4
+CPU part        : 0xd0b
+CPU revision    : 1
+
+processor       : 3
+BogoMIPS        : 108.00
+Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+CPU implementer : 0x41
+CPU architecture: 8
+CPU variant     : 0x4
+CPU part        : 0xd0b
+CPU revision    : 1
+
+Revision        : c04170
+Serial          : a37a9032d5c1c833
+Model           : Raspberry Pi 5 Model B Rev 1.0
+```
+
+---
+</details>
 
 ### Command
+
+Testing, tested for 3 main requirements:
+- Functionality - does the command preform accordingly.
+- Reliability - does the data transfer from one end keep its structure on the other end.
+- Security - does the server handle overflows, incorrect files/commands and path traversal.
+
+For an indepth description of each command and their purpose refer back to [Command Process](#command-process). 
+
+`Download;` - download a file from the mounted directory on the server
+```bash
+Download; hello_world.txt
+```
+
+`Upload;` - upload a file to the mounted directory on the server
+```bash
+Upload; ../../../hello_world.txt
+```
+<details>
+<summary>Upload Test Results</summary>
+
+Server Output:
+```bash
+server@raspberrypi:~/FTP-Server/src/server-src/build $ ls ~/FTP-Testing/
+files10.txt  files2.txt  files4.txt  files6.txt  files8.txt  hello.c
+files1.txt   files3.txt  files5.txt  files7.txt  files9.txt  hello_world.txt
+server@raspberrypi:~/FTP-Server/src/server-src/build $ ./server 192.168.0.250 2121 /home/server/FTP-Testing/
+Creating listening socket...
+-----------------------------------> Done
+Binding socket to port and address...
+-----------------------------------> Done
+Listening for incoming connections...
+Ready to accept connections...
+Ready to accept connections...
+Accepted connection from 192.168.0.244:56690
+Received 77 bytes
+Request: Upload; ../hello_to_me.txt
+Hello to me from client to server
+I uploaded this
+Send 1 bytes
+^C
+server@raspberrypi:~/FTP-Server/src/server-src/build $ ls ~/FTP-Testing/
+files10.txt  files2.txt  files4.txt  files6.txt  files8.txt  hello.c          hello_world.txt
+files1.txt   files3.txt  files5.txt  files7.txt  files9.txt  hello_to_me.txt
+```
+
+Client Output:
+```bash
+./build/client 192.168.0.250 2121
+Creating socket...
+-----------------------------------> Done
+Attempting to connect to server...
+-----------------------------------> Done
+Connected to 192.168.0.250:2121
+Received 271 bytes
+--------------------------------
+|  Welcome to RPi FTP Server   |
+|------------------------------|
+|  Use the following commands: |
+|-------------------------------
+|  Download; file  |
+|  Upload; file    |
+|  List;           |
+|  Read; file      |
+--------------------
+$ Upload; ../hello_to_me.txt
+Send 77 bytes
+```
+
+Sample Demo:
+
+<p>
+	<img src="video/upload_test.gif">
+</p>
+
+</details>
+
+---
+
+`List;` - list the files in the mounted directory on the server
+```bash
+List;
+```
+<details>
+<summary>List Test Results</summary>
+
+Server Output:
+```
+server@raspberrypi:~/FTP-Server/src/server-src/build $ ./server 192.168.0.250 2121 /home/server/FTP-Testing/
+Creating listening socket...
+-----------------------------------> Done
+Binding socket to port and address...
+-----------------------------------> Done
+Listening for incoming connections...
+Ready to accept connections...
+Ready to accept connections...
+Accepted connection from 192.168.0.244:56696
+Received 6 bytes
+Request: List;
+Send 136 bytes
+```
+
+Client Output:
+```bash
+./build/client 192.168.0.250 2121
+Creating socket...
+-----------------------------------> Done
+Attempting to connect to server...
+-----------------------------------> Done
+Connected to 192.168.0.250:2121
+Received 271 bytes
+--------------------------------
+|  Welcome to RPi FTP Server   |
+|------------------------------|
+|  Use the following commands: |
+|-------------------------------
+|  Download; file  |
+|  Upload; file    |
+|  List;           |
+|  Read; file      |
+--------------------
+$ List;
+Send 6 bytes
+Received 136 bytes
+files3.txt
+hello.c
+files10.txt
+files4.txt
+files6.txt
+hello_world.txt
+files8.txt
+files7.txt
+files5.txt
+files1.txt
+files2.txt
+files9.txt
+```
+
+Sample Demo:
+<p align="center">
+	<img src="videos/list_test.gif">
+</p>
+
+</details>
+
+---
+
+`Read;` - read contents of a file in the mounted directory on the server
+```bash
+Read; hello_world.txt
+```
+
+<details>
+<summary>Read Test Results</summary>
+
+Server Output:
+```bash
+server@raspberrypi:~/FTP-Server/src/server-src/build $ ./server 192.168.0.250 2121 /home/server/FTP-Testing/
+Creating listening socket...
+-----------------------------------> Done
+Binding socket to port and address...
+-----------------------------------> Done
+Listening for incoming connections...
+Ready to accept connections...
+Ready to accept connections...
+Accepted connection from 192.168.0.244:56782
+Received 22 bytes
+Request: Read; hello_world.txt
+Send 80 bytes
+```
+
+Client Output:
+```
+./build/client 192.168.0.250 2121
+Creating socket...
+-----------------------------------> Done
+Attempting to connect to server...
+-----------------------------------> Done
+Connected to 192.168.0.250:2121
+Received 271 bytes
+--------------------------------
+|  Welcome to RPi FTP Server   |
+|------------------------------|
+|  Use the following commands: |
+|-------------------------------
+|  Download; file  |
+|  Upload; file    |
+|  List;           |
+|  Read; file      |
+--------------------
+$ Read; hello_world.txt
+Send 22 bytes
+Received 80 bytes
+Hello This Is From FTP Server
+How are you doing?
+I am glad the transfer worked
+```
+
+Sample Demo:
+
+<p align="center">
+	<img src="video/read_test.gif">
+</p>
+
+</details>
+
+---
+
