@@ -1,2 +1,0 @@
-Hello to me from client to server
-I uploaded this

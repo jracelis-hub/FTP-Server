@@ -510,7 +510,7 @@ Send 77 bytes
 Sample Demo:
 
 <p>
-	<img src="video/upload_test.gif">
+	<img src="videos/upload_test.gif">
 </p>
 
 </details>
@@ -639,7 +639,7 @@ I am glad the transfer worked
 Sample Demo:
 
 <p align="center">
-	<img src="video/read_test.gif">
+	<img src="videos/read_test.gif">
 </p>
 
 </details>
